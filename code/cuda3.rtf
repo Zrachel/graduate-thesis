@@ -1,0 +1,157 @@
+{\rtf1\ansi\ansicpg936\cocoartf1343\cocoasubrtf160
+{\fonttbl\f0\fnil\fcharset0 MicrosoftYaHei;}
+{\colortbl;\red255\green255\blue255;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\fs24 \cf0 fundamental gpu algorithms\
+- reduce\
+- scan\
+- histogram\
+\
+\
+1. Task complexity\
+task complexity\uc0\u21253 \u25324 step complexity\u65288 \u21487 \u20197 \u24182 \u34892 \u25104 \u20960 \u20010 \u25805 \u20316 \u65289  & work complexity\u65288 \u24635 \u20849 \u26377 \u22810 \u23569 \u20010 \u24037 \u20316 \u35201 \u20570 \u65289 \u12290 \
+e.g. \uc0\u19979 \u38754 \u30340 tree-structure\u22270 \u20013 \u27599 \u20010 \u33410 \u28857 \u34920 \u31034 \u19968 \u20010 \u25805 \u20316 \u25968 \u65292 \u27599 \u26465 \u36793 \u34920 \u31034 \u19968 \u20010 \u25805 \u20316 \u65292 \u21516 \u23618 edge\u34920 \u31034 \u30456 \u21516 \u25805 \u20316 \u65292 \u38382 \u35813 \u22270 \u34920 \u31034 \u30340 task\u30340 step complexity & work complexity\u20998 \u21035 \u26159 \u22810 \u23569 \u12290 \
+1.png\
+Ans:\
+step complexity: 3\uc0\u65307 \
+work complexity: 7\
+\uc0\u19979 \u38754 \u20250 \u26377 \u26356 \u20855 \u20307 \u30340 \u20363 \u23376 \
+\
+\
+2. Reduce.\
+\uc0\u24341 \u20837 \u65306 \u25105 \u20204 \u32771 \u34385 \u19968 \u20010 task\u65306 1+2+3+4+\'85\
+1) \uc0\u26368 \u31616 \u21333 \u30340 \u39034 \u24207 \u25191 \u34892 \u39034 \u24207 \u32452 \u32455 \u20026 ((1+2)+3)+4...\
+2) \uc0\u30001 \u20110 operation\u20043 \u38388 \u27809 \u26377 \u20381 \u36182 \u20851 \u31995 \u65292 \u25105 \u20204 \u21487 \u20197 \u29992 Reduce\u31616 \u21270 \u25805 \u20316 \u65292 \u23427 \u21487 \u20197 \u20943 \u23569 serial implementation\u30340 \u27493 \u25968 \u12290 \
+\
+what is reduce?\
+Reduce input: \
+1) set of elements \
+2) reduction operation\
+    a) binary: \uc0\u20004 \u20010 \u36755 \u20837 \u19968 \u20010 \u36755 \u20986 \
+    b) \uc0\u25805 \u20316 \u28385 \u36275 \u32467 \u21512 \u24459 \u65306  (a@b)@c = a@(b@c), \u20854 \u20013 @\u34920 \u31034 operator\
+         e.g +, \uc0\u25353 \u20301 \u19982  \u37117 \u31526 \u21512 \u65307 a^b(expotentiation)\u21644 \u20943 \u27861 \u37117 \u19981 \u26159 \
+2. add_tree.png\
+\
+Serial implementation of Reduce:\
+reduce\uc0\u30340 \u27599 \u19968 \u27493 \u25805 \u20316 \u37117 \u20381 \u36182 \u20110 \u20854 \u21069 \u19968 \u20010 \u25805 \u20316 \u30340 \u32467 \u26524 \u12290 \u27604 \u22914 \u23545 \u20110 \u21069 \u38754 \u37027 \u20010 \u20363 \u23376 \u65292 n\u20010 \u25968 \u30456 \u21152 \u65292 work complexity \u21644  step complexity\u37117 \u26159 O(n)\u65288 \u21407 \u22240 \u19981 \u35328 \u33258 \u26126 \u21543 ~\u65289 \u25105 \u20204 \u30340 \u30446 \u26631 \u23601 \u26159 \u24182 \u34892 \u21270 \u25805 \u20316 \u65292 \u38477 \u19979 \u26469 step complexity. e.g add serial reduce -> parallel reduce: \
+3. parallel_add.png\
+\uc0\u20063 \u23601 \u26159 \u35828 \u65292 \u25105 \u20204 \u25226 step complexity\u38477 \u21040 \u20102 log_2(n)\
+\uc0\u37027 \u20040 \u22914 \u26524 \u23545 2^10\u20010 \u25968 \u20570 parallel reduce add\u65292 \u20854 step complexity\u23601 \u26159 10. \u37027 \u20040 \u22312 \u36825 \u20010 parallel reduce\u30340 \u31532 \u19968 \u27493 \u65292 \u25105 \u20204 \u38656 \u35201 \u20570 512\u20010 \u21152 \u27861 \u65292 \u36825 \u23545 modern gpu\u19981 \u26159 \u21861 \u22823 \u38382 \u39064 \u65292 \u20294 \u26159 \u22914 \u26524 \u25105 \u20204 \u35201 \u23545 2^20\u20010 \u25968 \u20570 \u21152 \u27861 \u21602 \u65311 \u23601 \u38656 \u35201 \u32771 \u34385 \u21040 gpu\u25968 \u37327 \u20102 \u65292 \u22914 \u26524 \u35828 gpu\u26368 \u22810 \u33021 \u24182 \u34892 \u20570 512\u20010 \u25805 \u20316 \u65292 \u25105 \u20204 \u23601 \u24212 \u23558 2^20\u20010 \u25968 \u20998 \u25104 1024*1024(\u20849 1024\u32452 )\u65292 \u27599 \u27425 \u20570 2^10\u20010 \u25968 \u30340 \u21152 \u27861 \u12290 \u36825 \u31181 \u32771 \u34385 task\u35268 \u27169 \u21644 gpu\u25968 \u37327 \u20851 \u31995 \u30340 \u20570 \u27861 \u26377 \u20010 \u29702 \u35770 \u21483 Brent\'92s Theory. \u19979 \u38754 \u25105 \u20204 \u20855 \u20307 \u26469 \u30475 \u65306 \
+4. brent's theory.png\
+\uc0\u20063 \u23601 \u26159 \u36827 \u34892 \u20004 \u27493 \u25805 \u20316 \u65292 \u31532 \u19968 \u27493 \u20998 \u25104 1024\u20010 block\u65292 \u27599 \u20010 block\u20570 \u21152 \u27861 \u65307 \u31532 \u20108 \u27493 \u23558 \u36825 1024\u20010 \u32467 \u26524 \u20877 \u29992 1\u20010 1024\u20010 thread\u30340 block\u36827 \u34892 \u27714 \u21644 \u12290 code\u65306 \
+__global__ void parallel_reduce_kernel(float *d_out, float* d_in)\{\
+	int myID = threadIdx.x + blockIdx.x * blockDim.x;\
+	int tid = threadIdx.x;\
+\
+	//divide threads into two parts according to threadID, and add the right part to the left one, lead to reducing half elements, called an iteration; iterate until left only one element\
+	for(unsigned int s = blockDim.x / 2 ; s>0; s>>1)\{\
+		if(tid<s)\{\
+			d_in[myID] += d_in[myID + s];\
+		\}\
+		__syncthreads(); //ensure all adds at one iteration are done\
+	\}\
+	if (tid == 0)\{\
+		d_out[blockIdx.x] = d_in[myId];\
+	\}\
+\}\
+\
+\
+\
+Histogram\
+1. what is histogram?\
+\uc0\u39038 \u21517 \u24605 \u20041 \u65292 \u32479 \u35745 \u30452 \u26041 \u22270 \u23601 \u26159 \u23558 \u19968 \u20010 \u32479 \u35745 \u37327 \u22312 \u30452 \u26041 \u22270 \u20013 \u26174 \u31034 \u20986 \u26469 \u12290 \
+\
+2. Serial \uc0\u23454 \u29616 \u65306 \
+\uc0\u20998 \u20004 \u37096 \u20998 \u65306 1. \u21021 \u22987 \u21270 \u65292 2. \u32479 \u35745 \
+for(i = 0; i < bin.count; i++)\
+	res[i] = 0;\
+for(i = 0; i<nElements; i++)\
+	res[computeBin(i)] ++;\
+\
+3. Parallel \uc0\u23454 \u29616 \u65306 \
+1. \uc0\u30452 \u25509 \u23454 \u29616 \u65306 \
+\
+kernel:\
+__global__ void naive_histo(int* d_bins, const int* d_in, const in BIN_COUNT)\{\
+	int myID = threadIdx.x + blockDim.x * blockIdx.x;\
+	int myItem = d_in[myID];\
+	int myBin = myItem % BIN_COUNT;\
+	d_bins[myBin]++;\
+\}\
+\
+\uc0\u26469 \u24819 \u24819 \u36825 \u26679 \u26377 \u20160 \u20040 \u38382 \u39064 \u65311 \u21448 \u26159 \u25105 \u20204 \u19978 \u27425 \u35828 \u30340 read-modify-write\u38382 \u39064 \u65292 \u32780 serial implementation\u19981 \u20250 \u26377 \u36825 \u20010 \u38382 \u39064 \u65292 \u37027 \u20040 \u24819 \u23454 \u29616 parallel histogram\u35745 \u31639 \u26377 \u20160 \u20040 \u26041 \u27861 \u21602 \u65311 \
+\
+\uc0\u27861 1. accumulate using atomics\
+\uc0\u21363 \u65292 \u23558 \u26368 \u21518 \u19968 \u21477 \u21464 \u25104 atomicAdd(&(d_bins[myBin]), 1);\
+\uc0\u20294 \u26159 \u23545 \u20110 atomics\u30340 \u26041 \u27861 \u32780 \u35328 \u65292 \u19981 \u31649 GPU\u22810 \u22909 \u65292 \u24182 \u34892 \u32447 \u31243 \u25968 \u37117 \u34987 \u38480 \u21046 \u21040 histogram\u20010 \u25968 N\u65292 \u20063 \u23601 \u26159 \u26368 \u22810 \u21482 \u26377 N\u20010 \u32447 \u31243 \u24182 \u34892 \u12290 \
+\
+\uc0\u27861 2. local memory + reduce\
+\uc0\u35774 \u32622 n\u20010 \u24182 \u34892 \u32447 \u31243 \u65292 \u27599 \u20010 \u32447 \u31243 \u37117 \u26377 \u33258 \u24049 \u30340 local histogram\u65288 \u19968 \u20010 \u38271 \u20026 bin\u25968 \u30340 vector\u65289 \u65307 \u21363 \u27599 \u20010 local histogram\u37117 \u34987 \u19968 \u20010 thread\u39034 \u24207 \u35775 \u38382 \u65292 \u25152 \u20197 \u36825 \u26679 \u27809 \u26377 shared memory\u65292 \u21363 \u20415 \u27809 \u26377 \u29992 atomics\u20063 \u19981 \u20250 \u20986 \u29616 read-modify-write\u38382 \u39064 \u12290 <br/>\u28982 \u21518 \u65292 \u25105 \u20204 \u23558 \u36825 n\u20010 histogram\u36827 \u34892 \u21512 \u24182 \u65288 \u21363 \u21152 \u21644 \u65289 \u65292 \u21487 \u20197 \u36890 \u36807 reduce\u23454 \u29616 \u12290 \
+<br/>\
+\uc0\u27861 3. sort then reduce by key\
+\uc0\u23558 \u25968 \u25454 \u32452 \u32455 \u25104 key-value\u23545 \u65292 key\u20026 histogram bin\u65292 value\u20026 1\u65292 \u21363 \
+<table align = \'93center\'94>\
+	<tr>\
+		<td>key</td>\
+		<td>2</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>2</td>\
+		<td>1</td>\
+		<td>0</td>\
+		<td>2</td>\
+		<td>2</td>\
+	</tr>\
+	<tr>\
+		<td>value</value>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+	</tr>\
+</table>\
+\uc0\u23558 \u20854 \u25353 key\u25490 \u24207 \u65292 \u24418 \u25104 \u65306 \
+<table align = \'93center\'94>\
+	<tr>\
+		<td>key</td>\
+		<td>0</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>2</td>\
+		<td>2</td>\
+		<td>2</td>\
+		<td>2</td>\
+	</tr>\
+	<tr>\
+		<td>value</value>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+		<td>1</td>\
+	</tr>\
+</table>\
+\uc0\u28982 \u21518 \u23545 \u30456 \u21516 key\u36827 \u34892 reduce\u27714 \u21644 \u65292 \u23601 \u21487 \u20197 \u24471 \u21040 histogram\u20013 \u30340 \u27599 \u20010 bin\u30340 \u24635 \u25968 \u12290 \
+\
+\
+\uc0\u32508 \u19978 \u65292 \u26377 \u19977 \u31181 \u23454 \u29616 paralle histogram\u30340 \u26041 \u27861 \u65306 \
+1. atomics\
+2. per_thread histogram, then reduce\
+3. sort, then reduce by key\
+\
+Homework: Tone mapping(\uc0\u21487 \u20197 \u29992 \u19978 reduce\u65292 scan\u65292 histogram\u36825 \u19977 \u20010 \u25216 \u26415 )\u12290 \
+\
+\
+\
+\
+}
