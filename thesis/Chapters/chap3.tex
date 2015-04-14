@@ -1,0 +1,87 @@
+\input{./Chapters/chap3_1}
+
+\input{./Chapters/chap3_2}
+
+\section{插入算法伪代码}
+以下是插入算法伪代码示例，如算法\ref{alg:skeleton_dt}所示。
+
+\begin{algorithm}[!htb]
+\caption{基于距离变换的骨架提取}
+\label{alg:skeleton_dt}
+\begin{algorithmic}[1]
+\Require 前景的二值图 bw \Comment{像素的灰度值为0或1} 
+\Ensure 骨架图 skel
+\State // 第1次遍历：从上往下，从左往右
+\For{$i=1,\dots ,M$} \Comment{M是二值图的高度}
+    \For{$j=1,\dots ,N$} \Comment{N是二值图的宽度}
+        \State bw[i][j] = 1 + min(bw[i][j-1], bw[i-1][j])  \Comment{min函数取极小值} 
+    \EndFor
+\EndFor
+\State // 第2次遍历：从下往上，从右往左
+\For{$i=M,\dots ,1$}
+    \For{$j=N,\dots ,1$}
+        \State bw[i][j] = 1 + min(bw[i][j], bw[i+1][j], bw[i][j+1])
+    \EndFor
+\EndFor
+\State // 第3次遍历：获取骨架图
+\State skel 的空间分配，并将每个像素初始化为0
+\For{$i=1,\dots ,M$}
+    \For{$j=1,\dots ,N$}
+        \State t = max(bw[i-1][j], bw[i+1][j], bw[i][j-1], bw[i][j+1])  \Comment{max函数取极大值} 
+        \State t = max(t, bw[i-1][j-1],bw[i-1][j+1],bw[i+1][j-1],bw[i+1][j+1])
+        \If {bw[i][j]>=t}
+        	\State skel[i][j]=1 \Comment{骨架点} 
+        \Else 
+        	\State skel[i][j]=0
+        \EndIf
+    \EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\section{插入源代码}
+代码示例：
+
+\begin{lstlisting}[language=C] 
+int main(int argc, char ** argv) 
+{ 
+	printf("Hello world! \n"); 
+	return 0; 
+} 
+\end{lstlisting} 
+
+\section{插入定义、定理等}
+实例来自 https://github.com/eclipselu/zjuthesis-mphil。
+
+\begin{hypo}
+待月西厢下，迎风户半开；隔墙花影动，疑是玉人来。
+\begin{eqnarray}
+  \label{eq:eqnxmp}
+  c & = & a^2 - b^2\\
+    & = & (a+b)(a-b)
+\end{eqnarray}
+\end{hypo}
+
+\begin{defin}
+子曰：「道千乘之国，敬事而信，节用而爱人，使民以时。」
+\end{defin}
+
+\begin{theo}
+犯我强汉者，虽远必诛。\hfill —— 陈汤（汉）
+\end{theo}
+
+\begin{pro}
+天不言自高，水不言自流。
+\begin{gather*}
+\begin{split} 
+\varphi(x,z)
+&=z-\gamma_{10}x-\gamma_{mn}x^mz^n\\
+&=z-Mr^{-1}x-Mr^{-(m+n)}x^mz^n
+\end{split}\\[6pt]
+\begin{align} \zeta^0&=(\xi^0)^2,\\
+\zeta^1 &=\xi^0\xi^1,\\
+\zeta^2 &=(\xi^1)^2,
+\end{align}
+\end{gather*}
+\end{pro}
+
