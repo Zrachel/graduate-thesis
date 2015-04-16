@@ -1,0 +1,52 @@
+\section{卷积神经网络}
+\subsection{介绍}
+
+在之前的50年左右，传统的模式识别模型用手工定义的特征进行特征提取，通过对数据的分析选取可训分类器进行模型构建。 最近10年，借助现代计算机计算能力的提高和大数据量的爆发，神经网络方法得以重新广泛应用，在很多领域都达到非常好的效果， 我们称这种利用大规模网络进行模式识别方法为深度学习（Deep Learning）， 也叫End-To-End Learning。不同于传统模型采用固定特征，或者固定kernel（核函数）进行样本度量； 深度学习采用可训特征（或可训的kernel）， 然后将特征作为可训练的分类器输入， 进行训练， 如表\ref{Tab: dl_overview_compare}。
+
+\begin{table}[ht]
+\centering
+  \begin{tabular}{c || c | c}
+  \hline\hline
+   & 特征 & 分类器 & 特点
+  \hline
+   传统方法 & 手工定义的特征 & 简单可训练分类器 & 特征设计费时，需强业务背景
+  \hline
+  深度学习 & 训练特征提取模型 & 复杂可训练分类器 & End-to-End learning，feature易操作
+  \hline
+  \end{tabular}
+  \caption{深度学习与传统模式识别方法}
+  \centering \label{Tab: dl_overview_compare}
+\end{table}
+
+历史上，第一个有学习功能的机器为1960年提出的Perceptron\cite{rosenblatt1960perceptron}, Perceptron是一个简单特征提取器上加载的一个线性分类器： 
+
+
+\begin{equation}
+\label{Eq:Perceptron}
+y=sign(\sum_{i=1}^N{w_iF_i(x)}+b)
+\end{equation}
+
+
+其中$x$为数据，$F_i(x)$为x的第i个特征，$w_i$为相应的特征权重参数， b为常参数， $sign$为分类器的非线性函数，对于二类分类，$sign$函数将结果映射到(0,1)。
+
+\begin{figure*}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[scale=0.9]{Pictures/CNN/perceptron.gif}\\
+  \caption{Perceptront图例}\label{fig:perceptron}
+\end{figure*}
+
+目前最普及的实际应用也用到了线性分类器的一些变种，或者叫模板匹配（template matching）。 但是由于其底层的特征提取器需要反映特定信号的特点， 所以需要由特定领域专家来设置。 比如图像处理领域， 对于不同任务（ 图像分类， 图像分割， 图像跟踪等）， 所要求的特征就各不相同， 需要针对特定任务定义图像特征。 此外，传统方法也很难设计kernel, 从而不容易表达对距离的度量，仍然以图像来说，最简单的距离度量思路是对应像素相减，但是这显然不能表达图像语义层的相似信息。
+
+为了能使特征更加灵活而且不过多依赖于专家指定的特征， 很多方法提出， 可以先指定简单feature， 然后通过无监督学习（如混合高斯， K-Means， 或Sparse Coding）进一步得到中间层特征， 将其输入分类器进行最后分类。 与其类似， 深度学习也是从数据分别生成底层特征， 中间层特征， 最后加入高层特征， 输入分类器进行分类。 那么什么是高层特征呢？ 以图像角度来看， 
+
+
+
+
+ 50年过去了， 这个模型没有进一步改变， 它也是深度学习的基本单元。 
+
+
+
+
+
+
