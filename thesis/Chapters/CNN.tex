@@ -61,10 +61,10 @@ y=sign(\sum_{i=1}^N{w_iF_i(x)}+b)
 
 同传统方法的基本方法类似， 深度学习也是从数据分别生成底层特征， 中间层特征， 最后加入高层特征， 输入分类器进行分类， 即学习数据的结构化表示。 其形式化表示为：
 \begin{equation}
-y=F(W^kF(W^{k-1}F(...F(W^0X)...)))
+y=f(W^kf(W^{k-1}f(...f(W^0X)...)))
 \label{Eq:dl_formulation}
 \end{equation}
-其中， W为权重参数，k为层数，$W^iX$为输入X的线性表示， $F$为非线性函数。 深度学习就是优化$y$与groundtruth之间的距离，使之最小化。 从图像角度， 如图\ref{fig:feature_level}所示\cite{zeiler2014visualizing,zeiler2013stochastic}，图中(a)，（b）,(c)分别为自动学得的底层特征，中层特征和高层特征， 其中底层特征学习图像的浅层特征，在所有类别中共享， 如(a)中,学到的特征类似Gabor滤波器所提取的边缘特征\cite{ngiam2010tiled,shi1998gabor}， 从中间层到高层依次学习图像更深层的语义特征， 如有语义的显著图像区域， 高层特征更为稳定，也具有类属性。  从自然语言处理的角度， 初始输入为字符， 从底层向上依次学习单词， 短语， 长句， 文章。
+其中， W为权重参数，k为层数，$W^iX$为输入X的线性表示， $f$为非线性函数, 如$tanh$ 函数。 深度学习就是优化$y$与groundtruth之间的距离，使之最小化。 从图像角度， 如图\ref{fig:feature_level}所示\cite{zeiler2014visualizing,zeiler2013stochastic}，图中(a)，（b）,(c)分别为自动学得的底层特征，中层特征和高层特征， 其中底层特征学习图像的浅层特征，在所有类别中共享， 如(a)中,学到的特征类似Gabor滤波器所提取的边缘特征\cite{ngiam2010tiled,shi1998gabor}， 从中间层到高层依次学习图像更深层的语义特征， 如有语义的显著图像区域， 高层特征更为稳定，也具有类属性。  从自然语言处理的角度， 初始输入为字符， 从底层向上依次学习单词， 短语， 长句， 文章。
 
 \begin{figure*}[htb]
   \centering
@@ -105,8 +105,8 @@ y=F(W^kF(W^{k-1}F(...F(W^0X)...)))
 
 
 神经网络在1940年代就开始了相关研究\citep{mcculloch1943logical,hebb1949organization}
-， 但早期提出的神经网络多为线性回归的变种， 没有很大突破。 1960年代，受神经科学的启发， 神经网络也随之发展。 当时神经科学在猫的视觉皮层发现了简单细胞和复杂细胞， 简单细胞对特定视觉输入（如边缘的方向）敏感， 会做出一定响应； 而复杂细胞相对简单细胞表现出更为鲁棒的响应， 即不受空间变化的影响。 这一特性使得神经网络向更深层发展， 也就是“深”的结构。 1965年， \cite{}提出了第一个深度学习模型——Group Method of Data Handling (GMDH)， 它通过回归方法进行网络训练， 再通过决策正则化去掉多余节点。 直到现在仍有很多应用以GMDH为基本框架， 如\cite{}Ikeda et al., 1976; Farlow, 1984; Madala and Ivakhnenko, 1994;
-Ivakhnenko, 1995; Kondo, 1998; Kord´ık et al., 2003; Witczak et al., 2006; Kondo and Ueno, 2008。 1979年， \cite{}第一次在Neocognitron中引入了卷积神经网络的概念。 其结构和现在我们用到的前向卷积神经网络比较相似， 也是基于梯度的深度学习方法。 只是， Neocognitron通过无监督的方法得到网络参数， 而不同于现在的有监督误差反传方法。 
+， 但早期提出的神经网络多为线性回归的变种， 没有很大突破。 1965年， \cite{ivakhneko1995review}提出了第一个深度学习模型——Group Method of Data Handling (GMDH)， 它通过回归方法进行网络训练， 再通过决策正则化去掉多余节点。 直到现在仍有很多应用以GMDH为基本框架， 如\cite{ikeda1976sequential,farlow1984self,madala1994inductive,kordik2003modified,witczak2006gmdh,
+kondo2008multi}。 1960年代，受神经科学的启发， 神经网络也随之发展。 当时神经科学在猫的视觉皮层发现了简单细胞和复杂细胞， 简单细胞对特定视觉输入（如边缘的方向）敏感， 会做出一定响应； 而复杂细胞相对简单细胞表现出更为鲁棒的响应， 即不受空间变化的影响。 受此启发， 1979年 \cite{fukushima1979neural} 第一次在Neocognitron中引入了类似卷积神经网络的概念。 Neocognitron是为手写体识别提出的一个有层级结构的多层神经网络， 它不仅可以识别训练样本中的模式， 还可以识别训练样本经过平移， 旋转或其他变换后的模式。 其结构和现在我们用到的前向卷积神经网络比较相似， 层间连接也应用了现在我们常用卷积神经网络类似的部分权值共享（详见第\ref{sec:CNN}节）。 只是， Neocognitron通过无监督学习， 根据样本获得不同的pattern， 而不同于现在的有监督误差反传方法。 此外还有一些小差别，比如在pooling策略上， Neocognitron采用空间域平均， 而且虽然Neocognitron的层级较深， 但是它并没有在效果中考虑到深层带来的效果。 
 
 
 
@@ -119,17 +119,10 @@ Ivakhnenko, 1995; Kondo, 1998; Kord´ık et al., 2003; Witczak et al., 2006; Kon
 \subsection{深度神经网络结构与训练}
 
 \begin{list}{•}
-
-\item 网络结构
-
-
-
+\item 网络结构\\
 从网络结构来分， 神经网络有前向网络（包括multilayer neural nets\cite{kuurkova1992kolmogorov,
 hornik1989multilayer,hornik1991approximation}和 convolutional nets \cite{lecun1995convolutional,krizhevsky2012imagenet},）， 回馈网络(包括 stacked sparse coding\cite{yu2011learning}, deconvolutional nets\cite{zeiler2010deconvolutional})和双向网络(包括 deep boltzmann machines\cite{salakhutdinov2009deep,
 srivastava2012multimodal,goodfellow2013multi}, stacked auto-encoder\cite{gehring2013extracting,vincent2010stacked,vincent2008extracting})三类\cite{lecun2013deep}。 目前， 前向网络使用最广， 如图\ref{fig:feed_forward}所示为一个前向网络的示意图。 
-
-
-
 
 \begin{figure*}[htb]
   \centering
@@ -138,8 +131,6 @@ srivastava2012multimodal,goodfellow2013multi}, stacked auto-encoder\cite{gehring
   \caption{前向网络的网络结构}\label{fig:feed_forward}
 \end{figure*}
 
-
-
 其中， $x_i$表示第i层的输入， 整个网络的输入为$x_1$； $w_i$表示第i层的参数， $w_i^Tx_i$得到$x_i$的线性组合； $f$为非线性函数， 每一层通过非线性函数将输入数据映射到下一层， 如图中蓝色箭头所示。 经过每一层非线性映射$f_i$的刀下一层输入，即
 \begin{equation}
  x_i = f_{i-1}(w_{i-1}^Tx_{i-1})
@@ -147,20 +138,69 @@ srivastava2012multimodal,goodfellow2013multi}, stacked auto-encoder\cite{gehring
 
 给定$x_1$对应的样本label$y$，我们的目标函数为$L(f_n(x_n),y)$， 其中$L$为损失函数。 常见的损失函数有平方损失， 指数损失， 对数损失等。 
 
+\item 训练方法\\
+
+自从1960年以来，不断有文章\cite{griewank2012documenta,director1969generalized,gray1965effect,bellman1962applied,
+kelley1960cutting,bryson1961diffraction,}从变分法中的欧拉-拉格朗日方程出发讨论如何利用梯度下降（gradient descent, 也叫steepest descent)的方法\cite{hadamard1908memoire} 来进行神经网络中多层非线性可导函数的优化。
+在这样的神经网络中， 可以通过链式法迭代地则对每个神经元求导\cite{bellman1962applied}。 之后，1970年， 误差反传算法（back-propagation algorithm， BP）\cite{hecht1989theory,goh1995back} 首次在Linnainmaa的硕士毕业论文\cite{linnainmaa1970representation}中提出， 其中描述， 误差反传算发可以高效应用于任意神经网络结构。 此后BP迅速应用到神经网络的训练中， 并实现了给定可导函数自动求解导数和BP\cite{speelpenning1980compiling}。 其基本思想如下： 由图\ref{fig:feed_forward}和式\ref{Eq:dl_formulation}可知， 在前向算法中从输入到输出经过了一系列非线性可导函数$f$的映射。 作为其逆过程， 如图中向下的紫色箭头所示， 在梯度下降算法的一步迭代中可用式\ref{Eq:bp_basic}计算参数$w_i$的变化。
 
 
+\begin{align}
+\label{Eq:bq_basic}
+\frac{\partial L}{\partial w_i} 
+&= \sum_t{\frac{\partial L}{\partial net_{i+1}}\cdot \frac{\partial net_{i+1}}{\partial w_i}}\\
+&= \sum_t{\frac{\partial L}{\partial net_{i+1}}\cdot \frac{\partial w_{i+1}^Tx_{i+1}}{\partial w_i}}
+\end{align}
 
-\item 训练方法
 
+其中， $net_k$为第k层输入$f$的线性组合,即
 
-我们希望最小化损失函数的值， 可以用误差反传算法（back-propagation algorithm）\cite{hecht1989theory,goh1995back}对每个$x_i$的求导结果更新参数$w$，如图中向下的紫色箭头所示， 可通过将误差逐层传递训练网络。
 
 \begin{equation}
-\frac{\partial L}{\partial x_{n-1}} = 
-\frac{\partial L}{\partial x_n}
-\frac{\partial f_{n-1}(w_{n-1}^Tx_{n-1})}{\partial x_{n-1}}
+	net_k = w_k^Tx_k
 \end{equation}
 
+
+这样就可通过将误差逐层传递训练网络。 整个算法流程如算法\ref{algo:BP_basic}。
+
+
+\renewcommand{\algorithmicrequire}{ \textbf{Input:}}      %Use Input in the format of Algorithm
+\renewcommand{\algorithmicensure}{ \textbf{Output:}}     %UseOutput in the format of Algorithm
+\begin{algorithm}
+\caption{前向网络的误差反传算法}
+\label{algo:BP_basic}
+\begin{algorithmic}[1]  
+\Require Data $x$, Label $y$
+\Ensure  updated weight $w$
+\For{k=K...1}
+	\State \delta_t \leftarrow 0 \% signal variable
+	\If{}
+	\EndIf
+\EndFor
+
+\State	$k_z\leftarrow3,\varepsilon\leftarrow1$
+\While{($\varepsilon=1$)}
+    \For{$c\leftarrow1 to N_c$}
+        \For{$i\leftarrow1 to S_b$}
+            \State $\Omega_0(i)\leftarrow \sum_{c=1}^C 1_{\left\{H_c^Q[i]=0\right\}}$
+        \EndFor
+    \EndFor
+    \State $T_{HZ}\leftarrow \frac{k_z}{k_z+1}$
+    \State $x=CrossSegment\left(\Omega_0,T_{HZ}\cdot\frac{S_b}{N_s}\right)$
+    \State $B=\left((x-1)+\frac{T_{HZ}\cdot \frac{S_b}{N_s}-\Omega_0(x-1)}{\Omega_0(x)-\Omega_0(x-1)}\right)\cdot \frac{S_b}{N_s}$
+    \State $HCT\leftarrow Huffman Encoding(H_c^Q,B)$
+    \If{($l_0(HCT)=\frac{3}{k_z}$)}
+        \State $\varepsilon\leftarrow 0$
+    \Else
+    	\If{($l_0(HCT)\leq 3$)}
+    	    \State $k_z\leftarrow \frac{3}{l_0(HCT)}$
+    	\Else
+	        \State $B\leftarrow 0,\ \varepsilon\leftarrow0$
+	    \EndIf
+    \EndIf
+\EndWhile
+\end{algorithmic} 
+\end{algorithm}
 
 
 
@@ -169,7 +209,7 @@ srivastava2012multimodal,goodfellow2013multi}, stacked auto-encoder\cite{gehring
 
 
 
-其中卷积神经网络属于前向网络， 广泛应用于图像识别。 我们将在第\ref{sec:CNN}节中介绍卷积神经网络的结构与训练过程， 在第\ref{sec:cnn_configure}节中介绍我们的数据与网络配置， 最后在第\ref{sec:cnn_experiment}中给出实验结果。
+在这三种为网络结构中， 卷积神经网络属于前向网络， 广泛应用于图像识别。 我们将在第\ref{sec:CNN}节中介绍卷积神经网络的结构与训练过程， 在第\ref{sec:cnn_configure}节中介绍我们的数据与网络配置， 最后在第\ref{sec:cnn_experiment}中给出实验结果。
 
 
 \section{卷积神经网络}\label{sec:CNN}
