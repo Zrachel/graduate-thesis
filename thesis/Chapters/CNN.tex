@@ -56,7 +56,15 @@ y=sign(\sum_{i=1}^N{w_iF_i(x)}+b)
 
 \subsection{深度学习方法}
 
-同传统方法的基本思想类似， 深度学习也是从数据分别生成底层特征， 中间层特征， 最后加入高层特征， 输入分类器进行分类。 从图像角度， 如图\ref{fig:feature_level}所示\cite{zeiler2014visualizing,zeiler2013stochastic}，图中(a)，（b）,(c)分别为底层特征，中层特征和高层特征， 其中底层特征学习图像的浅层特征，在所有类别中共享， 如(a)中,学到的特征类似Gabor滤波器所提取的边缘特征\cite{ngiam2010tiled,shi1998gabor}， 从中间层到高层逐渐学习图像的深层语义特征， 如有语义的显著图像区域， 高层特征更为稳定，也具有类属性。  从自然语言处理的角度， 初始输入为字符， 从底层向上依次学习单词， 短语， 长句， 文章。
+深度学习是近几年来很热的机器学习算法， 在语音识别，计算机视觉，自然语言处理等领域打破了维持了多年的竞赛记录。以最典型的时序模型——语音识别的发展为例， 在1980年代早期， 主要应用Dynamic time Warping (DTW)\cite{juang1984hidden,myers1981comparative,rabiner1978considerations,berndt1994using}， 输入底层特征，通过无监督学习所得中间层特征输入分类器进行分类。 1985年后， \cite{huang1990hidden,rabiner1989tutorial,rabiner1986introduction}提出在中间层用隐马尔科夫模型描述一个序列出现的概率，得到进一步改进。 2010年左右， 使用深度神经网络进行逐层有监督学习达到最佳效果\cite{waibel1989modular,nakamura1989speaker}。
+
+
+同传统方法的基本方法类似， 深度学习也是从数据分别生成底层特征， 中间层特征， 最后加入高层特征， 输入分类器进行分类。 其形式化表示为：
+\begin{equation}
+y=F(W^kF(W^{k-1}F(...F(W^0X)...)))
+\label{Eq:dl_formulation}
+\end{equation}
+其中， W为权重参数，k为层数，$W^iX$为输入X的线性表示， $F$为非线性函数。 深度学习就是优化$y$与groundtruth之间的距离，使之最小化。 从图像角度， 如图\ref{fig:feature_level}所示\cite{zeiler2014visualizing,zeiler2013stochastic}，图中(a)，（b）,(c)分别为自动学得的底层特征，中层特征和高层特征， 其中底层特征学习图像的浅层特征，在所有类别中共享， 如(a)中,学到的特征类似Gabor滤波器所提取的边缘特征\cite{ngiam2010tiled,shi1998gabor}， 从中间层到高层依次学习图像更深层的语义特征， 如有语义的显著图像区域， 高层特征更为稳定，也具有类属性。  从自然语言处理的角度， 初始输入为字符， 从底层向上依次学习单词， 短语， 长句， 文章。
 
 \begin{figure*}[htb]
   \centering
@@ -66,11 +74,49 @@ y=sign(\sum_{i=1}^N{w_iF_i(x)}+b)
 \end{figure*}
 
 
-按训练方法， 神经网络可以分为三类： 
-\begin{enumerate}
-	\item[有监督学习]
-	当样本的标号很全时，我们可以用纯有监督学习方法， 用随机梯度下降算法进行误差反传进行网络训练。 该方法通常用于
-\end{enumerate}
+除了自动学习特征外， 深度学习和传统模型还有一个重要区别就是“深”。 一般来说， 深度结构由多层含参的非线性模型组成， 以形成特征的层次结构。
+在\cite{bengio2007scaling,bengio2009learning}中讨论了深度模型的必要性。 浅层结构以现在的kernel machine\cite{scholkopf1999advances}为例， 如Support Vector Machine(SVMs)\cite{boser1992training,cortes1995support}。 这些方法定义特征
+为一系列kernel函数连接而成的向量， 在训练数据中进行模板匹配， 如式\ref{Eq:kernel_fea_vec}所示。
+
+\begin{equation}
+	\label{Eq:kernel_fea_vec}
+	\varphi(x) = [k(x,\mu_1),k(x,\mu_2),...,k(x,\mu_n)]
+\end{equation}
+
+式中， $\mu_i$为数据样本的一部分， 即模板样本； $\varphi(x)$为样本$x$的特征。 而后$\varphi(x)$通过线性组合进行分类:
+
+
+\begin{equation}
+	\label{Eq:kernel_predict}
+	F(x) = W^T\varphi(x)
+\end{equation}
+
+可见， kernel方法就是一个简单的模板匹配层连接一个线性函数层， 由于方法中模板都是从原始训练数据中提取而得， 所以kernel machine的第一层
+可视作一种简单的无监督方法， 只有式\ref{Eq:kernel_predict}中参数$W$的学习为有监督部分，没有涉及特征的层次结构， 因此不是深度模型。 同样，只有一个隐层的模型（如multilayer perceptron）也不算深度模型。 又如分类回归树（Classification and Regression Tree, CART）, 其中所有决策都是在输入空间定义的， 同样没有根据特征的层次结构进行学习， 因此也不属于深度模型。 虽然有一些理论保证浅层结构可以很好地拟合任何复杂函数， 它们却无法保证特征的高效表征。 而深度模型可以从根本上通过简单设置网络结构更有效地表示特定函数。 最典型的深度结构就是有多个隐层的神经网络， 其中每个隐层节点之间的连接权重（如图\ref{fig:perceptron}中的$w_i$）都是通过有监督学习而来的， 因此特征具有层次结构。
+
+
+由于90年代计算资源和数据量受限， 当隐层层数大于2的时候深度网络训练困难\cite{tesauro1992practical}， 所以之前神经网络的研究工作主要集中于浅层结构。 随着现在数据量的爆发， 神经网络的研究变得重新热门起来。 从网络结构来分， 有前向网络， 回馈网络和双向网络三类\cite{lecun2013deep}。 其中卷积神经网络属于前向网络， 广泛应用于图像识别。 我们将在第\ref{sec:CNN}节中介绍卷积神经网络的结构与训练过程， 在第\ref{sec:cnn_configure}节中介绍我们的数据与网络配置， 最后在第\ref{sec:cnn_experiment}中给出实验结果。
+
+
+\section{卷积神经网络}\label{sec:CNN}
+
+\subsection{Perceptron}
+
+\subsection{CNN网络结构}
+
+
+\section{ConvP300Net}\label{sec:cnn_configure}
+
+\subsection{任务描述}
+
+\subsection{网络结构}
+
+\section{实验结果}\label{sec:cnn_experiment}
+
+
+
+
+
 
 
 
