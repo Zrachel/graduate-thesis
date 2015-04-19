@@ -92,7 +92,7 @@ y=f(W^kf(W^{k-1}f(...f(W^0X)...)))
 \end{equation}
 
 可见， kernel方法就是一个简单的模板匹配层连接一个线性函数层， 由于方法中模板都是从原始训练数据中提取而得， 所以kernel machine的第一层
-可视作一种简单的无监督方法， 只有式\ref{Eq:kernel_predict}中参数$W$的学习为有监督部分，没有涉及特征的层次结构， 因此不是深度模型。 同样，只有一个隐层的模型（如multilayer perceptron）也不算深度模型。 又如分类回归树（Classification and Regression Tree, CART）, 其中所有决策都是在输入空间定义的， 同样没有根据特征的层次结构进行学习， 因此也不属于深度模型。 虽然有一些理论保证浅层结构可以很好地拟合任何复杂函数， 它们却无法保证特征的高效表征。 而深度模型可以从根本上通过简单设置网络结构更有效地表示特定函数。 最典型的深度结构就是有多个隐层的神经网络， 其中每个隐层节点之间的连接权重（如图\ref{fig:perceptron}中的$w_i$）都是通过有监督学习而来的， 因此可以很好地表征数据属性。
+可视作一种简单的无监督方法， 只有式\ref{Eq:kernel_predict}中参数$W$的学习为有监督部分，没有涉及特征的层次结构， 因此不是深度模型。 同样，只有一个隐层的模型（如multilayer perceptron）也不算深度模型。 又如分类回归树（Classification and Regression Tree, CART）, 其中所有决策都是在输入空间定义的， 同样没有根据特征的层次结构进行学习， 因此也不属于深度模型。 虽然有一些理论保证浅层结构可以以任意精度拟合任何复杂函数\cite{hornik1989multilayer,hecht1989theory,komolgorov1956representation}， 它们却无法保证特征的高效表征。 而深度模型可以从根本上通过简单设置网络结构更有效地表示特定函数。 最典型的深度结构就是有多个隐层的神经网络， 其中每个隐层节点之间的连接权重（如图\ref{fig:perceptron}中的$w_i$）都是通过有监督学习而来的， 因此可以很好地表征数据属性。
 
 
 
@@ -118,8 +118,8 @@ kondo2008multi}。 1960年代，受神经科学的启发， 神经网络也随�
 
 \subsection{深度神经网络结构与训练}
 
-\begin{list}{•}
-\item 网络结构\\
+\subsubsection{网络结构}\label{sec:network_architecture}
+
 从网络结构来分， 神经网络有前向网络（包括multilayer neural nets\cite{kuurkova1992kolmogorov,
 hornik1989multilayer,hornik1991approximation}和 convolutional nets \cite{lecun1995convolutional,krizhevsky2012imagenet},）， 回馈网络(包括 stacked sparse coding\cite{yu2011learning}, deconvolutional nets\cite{zeiler2010deconvolutional})和双向网络(包括 deep boltzmann machines\cite{salakhutdinov2009deep,
 srivastava2012multimodal,goodfellow2013multi}, stacked auto-encoder\cite{gehring2013extracting,vincent2010stacked,vincent2008extracting})三类\cite{lecun2013deep}。 目前， 前向网络使用最广， 如图\ref{fig:feed_forward}所示为一个前向网络的示意图。 
@@ -136,32 +136,85 @@ srivastava2012multimodal,goodfellow2013multi}, stacked auto-encoder\cite{gehring
  x_i = f_{i-1}(w_{i-1}^Tx_{i-1})
 \end{equation}
 
-给定$x_1$对应的样本label$y$，我们的目标函数为$L(f_n(x_n),y)$， 其中$L$为损失函数。 常见的损失函数有平方损失， 指数损失， 对数损失等。 
+给定$x_1$对应的样本label $y$，我们的目标函数为$L(f_n(x_n),y)$， 其中$L$为损失函数。 常见的损失函数有平方损失， 指数损失， 对数损失等。 
 
-\item 训练方法\\
+
+
+\subsubsection{网络训练与误差反传}
 
 自从1960年以来，不断有文章\cite{griewank2012documenta,director1969generalized,gray1965effect,bellman1962applied,
 kelley1960cutting,bryson1961diffraction,}从变分法中的欧拉-拉格朗日方程出发讨论如何利用梯度下降（gradient descent, 也叫steepest descent)的方法\cite{hadamard1908memoire} 来进行神经网络中多层非线性可导函数的优化。
-在这样的神经网络中， 可以通过链式法迭代地则对每个神经元求导\cite{bellman1962applied}。 之后，1970年， 误差反传算法（back-propagation algorithm， BP）\cite{hecht1989theory,goh1995back} 首次在Linnainmaa的硕士毕业论文\cite{linnainmaa1970representation}中提出， 其中描述， 误差反传算发可以高效应用于任意神经网络结构。 此后BP迅速应用到神经网络的训练中， 并实现了给定可导函数自动求解导数和BP\cite{speelpenning1980compiling}。 其基本思想如下： 由图\ref{fig:feed_forward}和式\ref{Eq:dl_formulation}可知， 在前向算法中从输入到输出经过了一系列非线性可导函数$f$的映射。 作为其逆过程， 如图中向下的紫色箭头所示， 在梯度下降算法的一步迭代中可用式\ref{Eq:bp_basic}计算参数$w_i$的变化。
+在这样的神经网络中， 可以通过链式法迭代地则对每个神经元求导\cite{bellman1962applied}。 之后，1970年， 误差反传算法（back-propagation algorithm， BP）\cite{hecht1989theory,goh1995back} 首次在Linnainmaa的硕士毕业论文\cite{linnainmaa1970representation}中提出， 其中描述， 误差反传算发可以高效应用于任意神经网络结构。 此后BP迅速应用到神经网络的训练中， 并实现了给定可导函数自动求解导数和BP\cite{speelpenning1980compiling}。 其基本思想如下： 由图\ref{fig:feed_forward}和式\ref{Eq:dl_formulation}， 在前向算法中从输入到输出经过了一系列非线性可导函数$f$的映射。  每次针对一个样本， 计算出其输出和样本真实label之间的loss$L$， 然后自上而下逐层更新权重参数$w$（如图中向下的紫色箭头所示）， 使得当前误差可以减小。 用所有样本依次对权重做完更新后叫做一轮迭代。 不断做n轮迭代， 直到全局loss降到某个预设阈值， 这时网络就已经学好了。 其中， 对 $w_i$ 更新权重时采用梯度下降的方法：
+
+\begin{equation}
+\label{Eq:gradient}
+	\Delta w_i = -\gamma \frac{\partial L}{\partial w_i}
+\end{equation}
+
+\begin{equation}
+\label{Eq:gradient_descent}
+	w_i = w_i + \Delta w_i
+\end{equation}
+
+式\ref{Eq:gradient}中， $\gamma$表示学习率， 就是每一步朝梯度下降方向走的步长， 是一个正的常数。 注意这里的负号表示loss是朝梯度下降的方向走。 式\ref{Eq:gradient_descent} 表示$w_i$ 每一步的更新。 但是$L$的表达式中难求对每个$w_i$的导数， 这里我们用$net_{j}$表示第j个隐层节点， 有
+
+\begin{equation}
+	net_j = \sum_i{w_{ij}o_i}
+\end{equation}
+
+即上一层输出到该节点的线性组合，其中$o_i$表示节点i的输出， $w_{ij}$表示节点i到j之间的连接， 有$o_{j} = f(net_j)$, 则$L$对$w_{ij}$的导数如式\ref{Eq:bq_basic}。
 
 
-\begin{align}
-\label{Eq:bq_basic}
-\frac{\partial L}{\partial w_i} 
-&= \sum_t{\frac{\partial L}{\partial net_{i+1}}\cdot \frac{\partial net_{i+1}}{\partial w_i}}\\
-&= \sum_t{\frac{\partial L}{\partial net_{i+1}}\cdot \frac{\partial w_{i+1}^Tx_{i+1}}{\partial w_i}}
-\end{align}
+\begin{equation}\label{Eq:bq_basic}
+\begin{split}
+\frac{\partial L}{\partial w_{ij}} 
+&= \frac{\partial L}{\partial net_j}\cdot \frac{\partial net_j}{\partial w_ij}\\
+&= \frac{\partial L}{\partial net_j}\cdot \frac{\partial \sum_k{w_{kj}o_k}}{\partial w_ij}\\
+&= \delta_{j}\cdot o_i
+\end{split}
+\end{equation}
+
+其中$o_i$为前向过程中第i层的输出， $\delta_j = \frac{\partial L}{\partial net_j}$i为第i层中从后向前传递的错误， 我们称之为反向传播误差（backpropagated error）。 由公式\ref{Eq:gradient}，\ref{Eq:gradient_descent}和\ref{Eq:bq_basic}可知， i,j节点之间的权重的参数$w_{ij}$更新由节点j在输出端的反向传播误差乘以节点i的输出$o_i$（也就是节点j的输入端）而得， 如图\ref{fig:update_weight} 所示， 黑色线条表示前向通路， 红色线条表示反向传回的误差$\Delta w_{ij}$。
+
+\begin{figure*}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[scale=0.8]{Pictures/CNN/weight_update-crop.pdf}\\
+  \caption{误差反向传播示意图}\label{fig:update_weight}
+\end{figure*}
 
 
-其中， $net_k$为第k层输入$f$的线性组合,即
+对于多层网络， 考虑如何计算反向传播误差$delta_{i}$。 对于整个网络的输出单元$net_n$， 可以直接算得$\delta_n = \frac{\partial L}{\partial net_n}$， 例如对于$L$取square loss的情况， 有
 
 
 \begin{equation}
-	net_k = w_k^Tx_k
+\begin{split}
+&	L(y,net_n)=\frac{1}{2}(net_n-y)^2 \\
+&	\delta_n = \frac{\partial L}{\partial net_n} = net_n - y
+\end{split}
 \end{equation}
 
 
-这样就可通过将误差逐层传递训练网络。 整个算法流程如算法\ref{algo:BP_basic}。
+对于隐层节点$net_j$， 通过链式法则求导可得， 如图\ref{fig:update_weight_2}和公式\ref{Eq:hidden_update}所示。 
+\begin{equation}\label{Eq:hidden_update}
+\begin{split}
+\delta_j
+	&=\frac{\partial L}{\partial net_j}\\
+	&=\sum_{k}\frac{\partial L}{\partial net_k}\cdot \frac{\partial net_k}{\partial net_j}\\
+	&=\sum_k \delta_{k} \cdot \frac{\partial \sum_i{w_{ik}o_i}}{\partial net_j}\\
+	&=\sum_k \delta_{k} \cdot \frac{\partial \sum_i{w_{ik}f(net_i)}}{\partial net_j}\\
+	&=\sum_k \delta_{k} \cdot w_{jk} f'(net_j)
+\end{split}
+\end{equation}
+
+\begin{figure*}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[scale=0.8]{Pictures/CNN/weight_update_2-crop.pdf}\\
+  \caption{$\frac{\partial L}{\partial net_j}$链式法则示意图}\label{fig:update_weight_2}
+\end{figure*}
+
+这样就可通过将误差逐层传递训练网络了。 整个算法流程如算法\ref{algo:BP_basic}所示。 在每一次迭代中， 首先前向计算出每个节点的输入$net_j$ 和输出$o_j$（见3~6行。 然后用误差反传算法， 在输出层直接用损失函数对节点求导计算反传误差（9-11行）， 其他隐层节点用公式\ref{Eq:hidden_update}计算反传误差（12-14行），最后更新权重参数（15-18行）。
 
 
 \renewcommand{\algorithmicrequire}{ \textbf{Input:}}      %Use Input in the format of Algorithm
@@ -172,44 +225,48 @@ kelley1960cutting,bryson1961diffraction,}从变分法中的欧拉-拉格朗日�
 \begin{algorithmic}[1]  
 \Require Data $x$, Label $y$
 \Ensure  updated weight $w$
-\For{k=K...1}
-	\State \delta_t \leftarrow 0 \% signal variable
-	\If{}
-	\EndIf
+\For{t=1...T} \% 迭代次数
+	\State \textbf{\textit{\% forward propagate}}
+	\ForAll{unit $j$ not $\in$ input layer}
+	\State $net_j \leftarrow \sum_i w_{ij}o_i$
+	\State $o_j \leftarrow f(net_j)$
+	\EndFor
+	\State 
+	\State \textbf{\textit{\% back propagate error}}
+	\ForAll{ unit $k \in $ output layer }
+		\State $\delta_k \leftarrow \frac{\partial L}{\partial net_k}$	\%直接求导计算	
+	\EndFor	
+	\ForAll{ unit $j \in $ hidden units }
+		\State $\delta_j \leftarrow f'(net_j)\sum_k{w_{kj}\delta_k}$ \%根据公式\ref{Eq:hidden_update}
+	\EndFor	
+	\ForAll{ weight $w_{ij}$ } \%根据公式\ref{Eq:gradient_descent}和\ref{Eq:bq_basic}更新权重参数
+		\State $\Delta w_{ij} \leftarrow \frac{\partial L}{\partial w_{ij}} = \delta_{j}\cdot o_i$
+		\State $w_{ij} \leftarrow w_ij + \Delta w_{ij}$
+	\EndFor
 \EndFor
-
-\State	$k_z\leftarrow3,\varepsilon\leftarrow1$
-\While{($\varepsilon=1$)}
-    \For{$c\leftarrow1 to N_c$}
-        \For{$i\leftarrow1 to S_b$}
-            \State $\Omega_0(i)\leftarrow \sum_{c=1}^C 1_{\left\{H_c^Q[i]=0\right\}}$
-        \EndFor
-    \EndFor
-    \State $T_{HZ}\leftarrow \frac{k_z}{k_z+1}$
-    \State $x=CrossSegment\left(\Omega_0,T_{HZ}\cdot\frac{S_b}{N_s}\right)$
-    \State $B=\left((x-1)+\frac{T_{HZ}\cdot \frac{S_b}{N_s}-\Omega_0(x-1)}{\Omega_0(x)-\Omega_0(x-1)}\right)\cdot \frac{S_b}{N_s}$
-    \State $HCT\leftarrow Huffman Encoding(H_c^Q,B)$
-    \If{($l_0(HCT)=\frac{3}{k_z}$)}
-        \State $\varepsilon\leftarrow 0$
-    \Else
-    	\If{($l_0(HCT)\leq 3$)}
-    	    \State $k_z\leftarrow \frac{3}{l_0(HCT)}$
-    	\Else
-	        \State $B\leftarrow 0,\ \varepsilon\leftarrow0$
-	    \EndIf
-    \EndIf
-\EndWhile
 \end{algorithmic} 
 \end{algorithm}
 
 
+BP尽管在理论上支持深度网络的训练， 但是实际应用中BP一般只对较浅的模型有效\cite{schmidhuber2015deep}， 因此提出了很多BP的改进算法，如:
 
-\end{list}
+\begin{enumerate}
+\item 关于BP加速\\
+为了加速BP， Rumelhart等人在1986年引入动量（momentum）\cite{rumelhart1985learning}； Fahlman向线性化的激活函数$f$的斜率加入ad-hoc常数\cite{fahlman1988empirical}; Sperduti 
+不但对x进行梯度下降，同时对梯度参数也进行梯度下降; \cite{sarkar1995methods} 将不同的bp加速策略做了比较。
+\item 关于BP学习率\\
+一般地， BP有两种学习率设定方法： 全局学习率 \cite{lapedes1988neural,vogl1988accelerating,lecun1993automatic} 和对每个权重都设一个自己的学习率\cite{jacobs1988increased,almeida1990speeding}。 在线学习中，$vario-\eta$\cite{neuneier1998train} 算法设置学习率与当前节点梯度的标准差成反比， 从而可以不受随机权重初始化的影响。
+
+\item 如何增强模型普适能力（generalization）\\
+为了提高模型的generalization，一些方法采用weight decay \cite{hanson1989comparing,weigend1991generalization}, 它本质上是一种正则化方法， 通过在loss function中加入权重参数的平方项来鼓励更小的权重， 惩罚大权重。 在线性模型中， 这种方法就是ridge regression。 加入weight decay一来可以限制模型的复杂度， 防止模型过拟合， 二来如果激活函数不能将输出规范化到输出应在的范围内， 大权重很可能让输出远远大于数据范围。 此外，大权重还会陷入Bias/Variance Dilemma\cite{geman1992neural}, 导致输出数据波动很大。 Hinton等人\cite{hinton1993keeping}从贝叶斯角度解释了weight decay可以从weight的高斯先验假设中得来， 证明了这不是一个简单的猜想。 另一些方法通过在weight中加其他先验实现同样的功能\cite{hastie1990generalized,hastie2009elements,mosteller1968data,mackay1992evidence}。
+
+\end{enumerate}
+
+	
+总结一下， 误差反传算法通过求损失函数对每个权重参数的导数对它们进行更新， 更新过程从输出端到输入端依次向下传递误差。 与数值差分相比， 误差反传方法更适应计算机运算， 而且计算更为高效。 在实际应用中， BP也有一些条件， 当问题定义的复杂度很高， 不能写出解析解， 但是确定有解的时候我们采用BP进行网络优化。 否则可能用传统方法或者查找表方法会更为简单精确， 具体问题具体分析。 
 
 
-
-
-在这三种为网络结构中， 卷积神经网络属于前向网络， 广泛应用于图像识别。 我们将在第\ref{sec:CNN}节中介绍卷积神经网络的结构与训练过程， 在第\ref{sec:cnn_configure}节中介绍我们的数据与网络配置， 最后在第\ref{sec:cnn_experiment}中给出实验结果。
+在第\ref{sec:network_architecture}节中这三种为网络结构中， 卷积神经网络属于广泛应用的前向神经网络。 我们将在第\ref{sec:CNN}节中介绍卷积神经网络的结构与训练过程， 在第\ref{sec:cnn_configure}节中介绍我们的数据与网络配置， 最后在第\ref{sec:cnn_experiment}中给出实验结果。
 
 
 \section{卷积神经网络}\label{sec:CNN}
