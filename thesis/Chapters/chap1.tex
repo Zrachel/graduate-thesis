@@ -37,7 +37,7 @@
 \end{figure}
 
 
-\section{P300}
+\section{P300}\label{sec:introduction_p300}
 
 
 现在有很多测量脑信号的技术，如fMRI （functional magnetic resonance imaging，功能性磁共振成像），NIRS（near-infrared spectroscopy，近红外光谱学），EEG（Electroencephalograph，脑电图），MEG（Magnetoencephalography，脑磁图）等。针对不同的采集信号，其信号预处理方法也各不相同。但是BCI最基本的任务都是正确地识别“签名”并翻译成机器指令以完成用户的意愿。在P300拼写中，可以通过“oddball task”（如图\ref{Fig:P300_brief}）产生P300信号。这个oddball task是一个关于字符注意的实验，展现一串字符（如SSTSSSSTSS），其中出现频率高的称为标准刺激（如该信号序列中的S），频率低的称为异常刺激（如该信号序列中的T）。当出现一个异常刺激时，300ms后就会在EEG信号中产生一个正向偏移。这里标准刺激和异常刺激的差异可以用来识别所给刺激的类别，然后基于刺激发送信号给计算机指令执行。
