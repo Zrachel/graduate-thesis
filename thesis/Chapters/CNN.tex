@@ -106,7 +106,7 @@ y=f(W^kf(W^{k-1}f(...f(W^0X)...)))
 
 神经网络在1940年代就开始了相关研究\citep{mcculloch1943logical,hebb1949organization}
 ， 但早期提出的神经网络多为线性回归的变种， 没有很大突破。 1965年， \cite{ivakhneko1995review}提出了第一个深度学习模型——Group Method of Data Handling (GMDH)， 它通过回归方法进行网络训练， 再通过决策正则化去掉多余节点。 直到现在仍有很多应用以GMDH为基本框架， 如\cite{ikeda1976sequential,farlow1984self,madala1994inductive,kordik2003modified,witczak2006gmdh,
-kondo2008multi}。 1960年代，受神经科学的启发， 神经网络也随之发展。 当时神经科学在猫的视觉皮层发现了简单细胞和复杂细胞， 简单细胞对特定视觉输入（如边缘的方向）敏感， 会做出一定响应； 而复杂细胞相对简单细胞表现出更为鲁棒的响应， 即不受空间变化的影响。 受此启发， 1979年 \cite{fukushima1979neural} 第一次在Neocognitron中引入了类似卷积神经网络的概念。 Neocognitron是为手写体识别提出的一个有层级结构的多层神经网络， 它不仅可以识别训练样本中的模式， 还可以识别训练样本经过平移， 旋转或其他变换后的模式。 其结构和现在我们用到的前向卷积神经网络比较相似， 层间连接也应用了现在我们常用卷积神经网络类似的部分权值共享（详见第\ref{sec:CNN}节）。 只是， Neocognitron通过无监督学习， 根据样本获得不同的pattern， 而不同于现在的有监督误差反传方法。 此外还有一些小差别，比如在pooling策略上， Neocognitron采用空间域平均， 而且虽然Neocognitron的层级较深， 但是它并没有在效果中考虑到深层带来的效果。 
+kondo2008multi}。 1960年代，受神经科学的启发， 神经网络也随之发展。 当时神经科学在猫的视觉皮层发现了简单细胞和复杂细胞， 简单细胞对局部视觉特征（如边缘的方向）敏感， 会做出一定响应； 而复杂细胞相对简单细胞表现出更为鲁棒的响应， 即不受空间变化的影响， 可以在视网膜一块邻域区域中选出简单细胞的一个输入作为输出。 受此启发， 1979年 \cite{fukushima1979neural} 第一次在Neocognitron中引入了类似卷积神经网络的概念。 Neocognitron是为手写体识别提出的一个有层级结构的多层神经网络， 它不仅可以识别训练样本中的模式， 还可以识别训练样本经过平移， 旋转或其他变换后的模式。 其结构和现在我们用到的前向卷积神经网络比较相似， 层间连接也应用了现在我们常用卷积神经网络类似的部分权值共享（详见第\ref{sec:CNN}节）。 只是， Neocognitron通过无监督学习， 根据样本获得不同的pattern， 而不同于现在的有监督误差反传方法。 此外还有一些小差别，比如在pooling策略上， Neocognitron采用空间域平均， 而且虽然Neocognitron的层级较深， 但是它并没有在效果中考虑到深层带来的效果。 
 
 
 
@@ -270,11 +270,17 @@ BP尽管在理论上支持深度网络的训练， 但是实际应用中BP一般
 
 
 \section{卷积神经网络}\label{sec:CNN}
+在上一节中我们已经提到， 卷积神经网络（Convolutional Neural Networks， CNN）是前向网络的一种， 其原型始于1979年Fukushima提出的Neurocognitron\cite{fukushima1979neural}， 但在后期经过了很多改进。 1989年， Lecun将误差反传算法应用于带有共享权值（详见第\ref{sec:cnn_arch}节）的卷积神经网络进行训练\cite{lecun1989backpropagation}， 这一工作的内容是现在我们前向神经网络的重要部分。 在20世纪90年代， CNN在指纹识别\cite{baldi1993neural}、 人脸识别\cite{lawrence1997face}、 语音识别\cite{abdel2012applying}、 物体识别\cite{nebauer1998evaluation}、 文档识别\cite{lecun1998gradient} 上的应用相继出现出现并予以商用。  
+
+近几年来， 随着计算机计算能力的增强和数据量的激增， 卷积神经网络在各个领域的应用更为广泛， 也得到了更好的效果。 以机器视觉领域为例， 09年， Turaga（MIT）等人用学习的方法， 以卷积神经网络为模型训练生成相似图\cite{turaga2010convolutional}， 使得和传统人工定义分割函数的方法相比，分割精度有了很大提升。 2011年， Sermanet（NYU）和Lecun将CNN应用于交通标志分类\cite{sermanet2011traffic}， 在GTSRB竞赛数据集\cite{stallkamp2011german}上达到99.17\%的最高准确率， 超过人的识别能力。 对于图像分割任务， 很多算法需要首先生成一张相似图（affinity graph）然后在其上做分割。 2012年， Alex Krizhevsky（Google）在ImageNet\cite{deng2009imagenet}上应用深度卷积神经网络进行图像分类\cite{krizhevsky2012imagenet}。 该任务要将130万高清图像分成1000类， Krizhevsky采用5层卷积层， 共50万个神经元节点，6000万个参数进行训练，达到了当时图像分类的最佳效果。 2014年， Taigman（Facebook）等人应用卷积神经网络建立了DeepFace\cite{taigman2014deepface}， 在包含4000多人的4百万人脸图像数据集上进行训练， 在LFW数据集\cite{huang2007labeled}上进行人脸识别， 结果达到97.35\%的识别率， 近乎和人的识别水平相当。 整个过程为检测人脸->对齐->3d人脸表征->分类， 其中分类用的是多达1.2亿个参数的9层非标准卷积神经网络。 同年， Simonyan（Oxford）等人将深度卷积神经网络应用到视频进行行为识别\cite{simonyan2014two}。 他们提出了一个双CNN框架， 分别在时间和空间方面各应用一个CNN， 并证明再多帧的深度光流上应用ConvNet可以在有限数据集上达到很好的效果。 Toshev和Szegedy（Google）用深度神经网络进行人体姿态估计\cite{toshev2014deeppose}。 该方法在CNN上实现一个回归问题， 回归目标为人体节点（如关节处）， 然后将多个这样的深度神经网络级联， 在姿态估计方面达到了目前最佳的准确率。 
+
+
+此外， DeepMind团队（Google）\cite{mnih2013playing}在卷积神经网络上进行增强学习，实现了机器自动打游戏。 Ciresan\cite{ciresan2013mitosis}将深度神经网络应用于医学图像， 进行癌细胞检测。  自然语言处理方面， Denil(Oxford)等人通过将文档嵌入一个低维向量空间来提取文档语义信息并做归类，  该模型基于卷积神经网络， 在语义级别和文档级别同时学习卷积核。在框架方面， 2014年， Goodfellow在神经网络中提出了一个估计生成模型的框架\cite{goodfellow2014generative}， 通过同时学习两个相互对立的模型， 一个生成模型G拟合数据分布，一个判别模型D估计样本从训练数据得到（而不是从G得到）的概率。最终目标最大化D犯错误的概率（即让G尽可能地模拟原始数据分布）， 其中G和D都是多层perceptron。 神经科学方面， Cadieu（MIT）将卷积神经网络应用下颞叶皮层信号的建模\cite{cadieu2014deep}， 揭示了下颞叶皮层在基于视觉的物体识别任务上对信息的表征能力。 也有工作将卷积神经网络应用于功能性磁共振成像（fMRI）数据大脑神经信号解码\cite{firat2014learning}， 结果和其他模式分析技术相比有所提高。 Barnickel等人基于卷积神经网络提出了SENNA， 一个快速精确地从生物类文献中提取分析予以相关性的神经网络\cite{barnickel2009large}。下面我们就来看一下卷积神经网络是如何工作的。
 
 
 \subsection{Perceptron}
 
-\subsection{CNN网络结构}
+\subsection{CNN网络结构}\label{sec:cnn_arch}
 
 
 \section{ConvP300Net}\label{sec:cnn_configure}
