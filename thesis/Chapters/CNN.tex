@@ -106,7 +106,7 @@ y=f(W^kf(W^{k-1}f(...f(W^0X)...)))
 
 神经网络在1940年代就开始了相关研究\citep{mcculloch1943logical,hebb1949organization}
 ， 但早期提出的神经网络多为线性回归的变种， 没有很大突破。 1965年， \cite{ivakhneko1995review}提出了第一个深度学习模型——Group Method of Data Handling (GMDH)， 它通过回归方法进行网络训练， 再通过决策正则化去掉多余节点。 直到现在仍有很多应用以GMDH为基本框架， 如\cite{ikeda1976sequential,farlow1984self,madala1994inductive,kordik2003modified,witczak2006gmdh,
-kondo2008multi}。 1960年代，受神经科学的启发， 神经网络也随之发展。 当时神经科学在猫的视觉皮层发现了简单细胞和复杂细胞， 简单细胞对局部视觉特征（如边缘的方向）敏感， 会做出一定响应； 而复杂细胞相对简单细胞表现出更为鲁棒的响应， 即不受空间变化的影响， 可以在视网膜一块邻域区域中选出简单细胞的一个输入作为输出。 受此启发， 1979年 \cite{fukushima1979neural} 第一次在Neocognitron中引入了类似卷积神经网络的概念。 Neocognitron是为手写体识别提出的一个有层级结构的多层神经网络， 它不仅可以识别训练样本中的模式， 还可以识别训练样本经过平移， 旋转或其他变换后的模式。 其结构和现在我们用到的前向卷积神经网络比较相似， 层间连接也应用了现在我们常用卷积神经网络类似的部分权值共享（详见第\ref{sec:CNN}节）。 只是， Neocognitron通过无监督学习， 根据样本获得不同的pattern， 而不同于现在的有监督误差反传方法。 此外还有一些小差别，比如在pooling策略上， Neocognitron采用空间域平均， 而且虽然Neocognitron的层级较深， 但是它并没有在效果中考虑到深层带来的效果。 
+kondo2008multi}。 1960年代，受神经科学的启发， 神经网络也随之发展。 当时神经科学在猫的视觉皮层发现了简单细胞和复杂细胞\cite{hubel1962receptive}， 简单细胞对局部视觉特征（如边缘的方向）敏感， 会做出一定响应； 而复杂细胞相对简单细胞表现出更为鲁棒的响应， 即不受空间变化的影响， 可以在视网膜一块邻域区域中选出简单细胞的一个输入作为输出。 受此启发， 1979年 \cite{fukushima1979neural} 第一次在Neocognitron中引入了类似卷积神经网络的概念。 Neocognitron是为手写体识别提出的一个有层级结构的多层神经网络， 它不仅可以识别训练样本中的模式， 还可以识别训练样本经过平移， 旋转或其他变换后的模式。 其结构和现在我们用到的前向卷积神经网络比较相似， 层间连接也应用了现在我们常用卷积神经网络类似的部分权值共享（详见第\ref{sec:CNN}节）。 只是， Neocognitron通过无监督学习， 根据样本获得不同的pattern， 而不同于现在的有监督误差反传方法。 此外还有一些小差别，比如在pooling策略上， Neocognitron采用空间域平均， 而且虽然Neocognitron的层级较深， 但是它并没有在效果中考虑到深层带来的效果。 
 
 
 
@@ -282,8 +282,9 @@ BP尽管在理论上支持深度网络的训练， 但是实际应用中BP一般
 
 \subsection{CNN网络结构}\label{sec:cnn_arch}
 
-\paragraph{卷积层}
+\begin{enumerate}
 
+\item 卷积层\\
 如图\ref{fig:feed_forward}所示， 卷积神经网络也是一个层级结构的前向神经网络。 除了输入层和输出层， 中间的隐层的目标是从原始数据学得一系列非线性组合， 使得可以很好地结合当前任务表征信号。 以图像为例， 输入为像素级数据， 每个像素本身不含有太多信息， 但是组合起来所得到的更高级别的特征可以表示物体类别等信息。 尽管我们的神经信号不同与图像信号， 但是文本分析\cite{collobert2008unified}， 语音识别等其他任务都受了图像的启发， 因其方便可视化， 所以我们采用图像进行解释。
 
 
@@ -310,19 +311,58 @@ BP尽管在理论上支持深度网络的训练， 但是实际应用中BP一般
 
 
 
-\paragraph{降采样层}
+\item 降采样层\\
+1998年， Yan Lecun等人提出， 在网络构建时可以在CNN网络的卷积层后面跟一个降采样层， 用来对卷积结果中的每个小窗口做平均或者最大化pooling。 有两个原因， 一来这样可以减少下一层的数据数据规模， 降低计算量； 二来这样在一个小区域的节点中做平均或最大化选择可以增加模型的适应性， 减少网络受旋转、 平移等变换的影响。 将卷积层和降采样层结合实际是受Hubel和Wiesel在生物实验上结果的影响\cite{hubel1962receptive}。 和卷积层类似， 降采样层也有相应的窗口高、宽和stride。 经过降采样层， 使得一块区域的数据被压缩， 分在不同的“池子”里， 因此降采样层所做的事情也叫做池化。 除了均值和最大值， 还可以取$L_1$, $L_2$范数进行降采样。
 
 
 
-
-
-此外， 在卷积神经网络中还有全连接层， 该层间神经元两两连接， 也就是说， 和全连接层相连接的层间权重个数等于两层神经元个数的乘积， 用来增强网络的表达能力。 综上， 一个典型的卷积神经网络如图\ref{fig:lenet}所示。 图为Yan Lecun的为MNIST数据集设计的卷积神经网络。 著名的手写MNIST数据集\cite{lecun1998mnist} 有60000个训练数据和10000个测试数据， 样本大小为32*32， 均为数字0~9， 共10类。
+\item 全连接与输出层\\
+一个典型的卷积神经网络如图\ref{fig:lenet}所示。 图为Yan Lecun的为MNIST数据集设计的卷积神经网络LeNet5\cite{lecun1998gradient}。 应用在著名的手写MNIST数据集\cite{lecun1998mnist} 有60000个训练数据和10000个测试数据， 样本大小为32*32， 均为数字0到9， 共10类。 从图中可见， 网络输入为数字图像， 前两层为有6个高、宽均为5的kernel（深度为6）的卷积层和窗口高、宽均为2的降采样层。 3,4层类似是一个卷积加降采样层。 此外， 在卷积神经网络中还有两层全连接层， 由全连接层连接的神经元两两连接， 也就是说， 和全连接层相连接的层间权重个数等于两层神经元个数的乘积， 用来增强网络的表达能力。 最后是输出层， 对于10类分类问题， 可以设置输出层为10个节点， 最后采用Softmax(如式\ref{Eq:softmax})或Sigmoid(如式\ref{Eq:sigmoid})函数进行分类。 在LeNet中， 最后一层采用的RBF网络， 达到测试误差达到0.95\%。 训练过程可参照LeNet5的一个demo\footnote{http://yann.lecun.com/exdb/lenet/}。
 
 \begin{figure*}[htb]
   \centering
   % Requires \usepackage{graphicx}
-  \includegraphics[scale=0.8]{Pictures/CNN/lenet.jpg}\\
-  \caption{lenet}\label{fig:lenet}
+  \includegraphics[scale=0.7]{Pictures/CNN/lenet.jpg}\\
+  \caption{LeNet5， 一个为手写数字做分类的卷积神经网络。\cite{lecun1998gradient}}\label{fig:lenet}
+\end{figure*}
+
+
+\begin{equation}
+S(t)=\frac{1}{1+e^{-t}}\label{Eq:sigmoid}
+\end{equation}
+
+\begin{equation}
+S(t) = \frac{e^{t}}{\sum_{l=1}^k{e^t}}\label{Eq:softmax}
+\end{equation}
+
+其中， $t$表示输入$x$的线性组合， 即$t=w^Tx$。
+
+
+
+
+\item 规则化层\\
+通常，我们希望输入数据是经过规则化（normalization）的， 即对数据进行白化（whiten）， 以减少数据variance产生的波动， 通过减均值，除以方差完成。 该层通常加在数据层之前。
+
+\item 激励层\\
+如果卷积神经网络中， 卷积层经过线性组合之后不加非线性函数的话， 那么整个网络就完全可以有一个线性函数来表示了。 为了增强模型的表达能力， 我们加入非线性层， 使所得结果 稀疏化， 或者得到侧抑制， 我们也称非线性层为激励层， 相应的非线性函数称为激励函数。 通常， 我们所用的非线性函数有Rectification（ReLU, 如式\ref{Eq:relu}）， Component-wise shrinkage, tanh（如式\ref{Eq:tanh}）和winner-takes-all。
+
+\begin{equation}\label{Eq:relu}
+ relu(x) = max(x,0)
+\end{equation}
+
+\begin{equation}\label{Eq:tanh}
+ tanh(x) = \frac{1-e^{-2x}}{1+e^{-2x}}
+\end{equation}
+
+\end{enumerate}
+
+综上， 现在用的卷积神经网络每个卷积层经过数据规则化， 卷积， 非线性激励， 池化（降采样） 四个模块。 整个卷积神经网络如图\ref{fig:whole_cnn_form}所示。
+
+\begin{figure*}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[scale=0.7]{Pictures/CNN/cnn_net_diag-crop.pdf}\\
+  \caption{卷积神经网络结构示意图}\label{fig:lenet}
 \end{figure*}
 
 
@@ -330,7 +370,8 @@ BP尽管在理论上支持深度网络的训练， 但是实际应用中BP一般
 
 
 
-\subsection{CNN的训练}
+
+\subsection{CNN网络训练}
 
 CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优化。 随机梯度下降算法源于随机优化。 随机优化在统计学习理论中非常常见， 即求参数$\theta$来最小化loss的期望。
 
@@ -349,22 +390,67 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
 	\theta_{k+1} = \theta_k - \eta g_k
 \end{equation}
 
-也就是更新方向为第k步时梯度下降最快的方向。 这种把数据看做一个源源不断的流数据， 每一轮（epoch）只对其中一部分数据进行更新的方法叫做随机梯度下降（Stochastic Gradient Descent， SGD)。 2006年， Mike O'Neill 在MNIST上训练CNN， 采用4个隐层， 共3215个隐层神经元节点， 134066个权重参数， 184974条网络连接（网络连接数大于权重参数， 因为网络中有两个卷积层， 其中是共享权值的）。 
-
-
-
-
-
+也就是更新方向为第k步时梯度下降最快的方向。 这种把数据看做一个源源不断的流数据， 每一轮（epoch）迭代对60000个训练样本分别进行权重更新的方法叫做随机梯度下降（Stochastic Gradient Descent， SGD)。 2006年， $Mike O'Neill$ 在MNIST上训练CNN， 采用4个隐层， 共3215个隐层神经元节点， 134066个权重参数， 184974条网络连接（网络连接数大于权重参数， 因为网络中有两个卷积层， 其中是共享权值的）。 一轮迭代大约用40分钟， 由于收敛大约需要30轮迭代， 所以整个训练时间大约需要20个小时。 用该方法， 他在MNIST上将测试集误差降到1.4\%。
 
 
 
 
 
 \section{ConvP300Net}\label{sec:cnn_configure}
+在第一章中， 我们已经介绍了oddball实验以及P300波形检测任务。 在这一章中， 我们进行第一章中提到的P300波形检测中的第一个任务——p300波形二类分类， 即将数据段分为是P300和不是P300。 之所以只做了P300分类而没有做字符识别是因为数据量有限， 如果做36类分类的话数据量不够。 下面我们来介绍数据集。
 
-\subsection{任务描述}
 
-\subsection{网络结构}
+\subsection{数据集}
+我们所用的数据来自BCI竞赛的第二个数据集\cite{blankertz2006bci}。该数据集由纽约健康部门Wadworth中心提供。 该数据为从两个测试个体上采集的EEG信号， 其中有受刺激所产生的的P300波形。 生成该数据时， 指定让实验主体看一个预先设定的字符， 然后如图\ref{Fig:p300matrix} 所示的矩阵以5.7Hz的频率进行行列交替随即闪烁。 当先后交替闪烁的一行一列相交于指定字符时产生一个P300信号。 
+
+实验时， 在最开始先空（没有任何闪烁）2.5s做准备。 然后每个行/列随即闪烁100ms， 每次闪烁后， 矩阵再空75ms。 接着， 每行/列再随机闪烁， 对每个指定字符所在的行/列各闪烁15次。 因此， 对每个字符， 理论上都有30个P300波形。 信号从64个通道， 以240Hz的频率进行采集， 然后将信号通过0.160Hz的带通滤波器\cite{sharbrough1991american}。 对每个实验主体， 训练数据和测试数据分别指定85个和100个字符， 那么训练集的P300波形共有85*2*15个。 根据我们上面的数据处理方法， 得到训练集和测试集上的数据段个数如表\ref{tab:p300_experiment_conf}所示。 
+
+
+\begin{table}[ht]
+\centering
+  \begin{tabular}{|c||c|c|}
+  \hline
+   & 训练数据 & 测试数据\\
+  \hline\hline
+   P300 & 2550 & 3000\\
+  \hline
+  非P300 & 12750 & 15000\\
+  \hline
+  \end{tabular}
+  \caption{各类数据数目}
+  \centering \label{tab:p300_experiment_conf}
+\end{table}
+
+
+\subsection{相关工作}
+在该数据集上， 已有的一些工作主要用多分类起来提高分类精度， 并用不同方法进行数据清洗。
+\begin{enumerate}
+	\item 基于SVM\\
+	\item 基于成分分析（ICA 和 PCA）\\
+	\item 基于LDA\\
+	\item 基于神经网络\\
+\end{enumerate}
+
+
+\subsection{P300检测网络结构}
+
+由于已有相关工作在p300检测上有所成效， 所以在我们的方法中， 研究采用卷积神经网络进行P300的检测。 在数据清洗与数据预处理方面， 我们采用和Hubert Cecotti等人在用卷积神经网络时对数据处理相同的方法\cite{cecotti2011convolutional}。 首先对数据进行降采样， 采用120Hz的采样率（而不是240Hz）进行数据采样。 然后通过0.1Hz到20Hz的带通滤波器， 在第二章中我们已经讲过EEG所采集的信号主要是低频信号， 因此这样有助于减少五官噪声。 过滤后的数据通过减均值除以方差来进行规则化（normalization）。 最后，我们将数据进行分段， 并标号（计算label）。 定义每个数据段长为$T_s$， 采样率为$f$, 则每个数据段持续时间长$T_s*f$。 这里我们取$T_s$为650ms， 即每一次从上一次闪烁和空闲之后开始采样， 采样650ms， 共$0.65s*120Hz=78$个采样点长的数据， 数据段之间有覆盖， 如图\ref{fig:data_segmentation}所示， 红色的箭头表示每一个行/列闪烁的起始时刻， 黑色的箭头表示数据分段的段起始点， 每段持续650ms， 可见数据段之间有覆盖， 每段标号以该段起始的那100ms闪烁为标准， 如果这100ms内闪烁的行/列包括指定字符， 其标号就为1， 否则指定标号为0。 整个数据预处理过程的流程图展现在图\ref{fig:data_preprocess_flow}中。
+
+\begin{figure*}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[scale=0.9]{Pictures/CNN/data_segmentation-crop.pdf}
+  \caption{P300检测——数据段分割}\label{fig:data_segmentation}
+\end{figure*}
+
+\begin{figure*}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[scale=0.8]{Pictures/CNN/cnn_flow-crop.pdf}
+  \caption{P300检测——数据预处理}\label{fig:data_preprocess_flow}
+\end{figure*}
+
+我们的网络结构如图所示。
 
 \section{实验结果及实现}\label{sec:cnn_experiment}
 
