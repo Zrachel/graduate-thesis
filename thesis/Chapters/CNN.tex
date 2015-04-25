@@ -140,7 +140,7 @@ srivastava2012multimodal,goodfellow2013multi}, stacked auto-encoder\cite{gehring
 
 
 
-\subsubsection{网络训练与误差反传}
+\subsubsection{网络训练与误差反传}\label{sec:train_net}
 
 自从1960年以来，不断有文章\cite{griewank2012documenta,director1969generalized,gray1965effect,bellman1962applied,
 kelley1960cutting,bryson1961diffraction,}从变分法中的欧拉-拉格朗日方程出发讨论如何利用梯度下降（gradient descent, 也叫steepest descent)的方法\cite{hadamard1908memoire} 来进行神经网络中多层非线性可导函数的优化。
@@ -454,7 +454,9 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
 
 
 
-我们的网络结构如图\ref{fig:p300cnn_network}所示。 由6层网络($L_0$到$L_5$)组成：
+我们的网络结构如图\ref{fig:p300cnn_network}所示， 我们称之为PConv网络。 由6层网络($L_0$到$L_5$)组成：
+
+
 \begin{enumerate}
 	\item $L_0$ \\
 		数据层由上面数据预处理过程得到的数据构成， 每个数据有64个通道， 78个采样点组成。 也就是在空间和时间维度分别为64维和78维。 
@@ -462,13 +464,18 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
 		$L_1$局部连接层类似卷积层， 只不过卷积层kernel中的权重参数在空间扫描的时候是共享的， 而局部连接层是不共享的。 对于大小为$(k_h, k_w)$的kernel， 一共可以卷积$(D_h-k_h+1)*(D_w-k_w+1)$次， 对于有$K$个节点的全连接层， 其参数数目为$k_h*k_w*K$； 对于局部连接层， 其参数数目为$(D_h-k_h+1)*(D_w-k_w+1)*k_h*k_w*K$个。 在Cecotti的工作中\cite{cecotti2011convolutional}， 第一层数据输入后采用卷积层将样本进行操作， 卷积核大小为$64*1$， 即在空间域对数据进行卷积， 在时间维度共享这个卷积核的权重。 但是， 时间维度为我们人为划分的数据段， 并没有道理说， 所有时间点上64个通道起相同作用， 即不应该让不同时间采样点共享权重。 所以在我们的工作中， 依然采用$64*1$的核函数， 但是在不同时间点有不同的权重大小， 即第一层采用局部连接层对空间域进行卷积。	
 		
 	\item $L_2$ 卷积层\\
-		在$L_2$， 我们采用卷积层将$L_1$的输出进行卷积。 对于大小为$N_s*1*78$的输入， 卷积核大小为
+		在$L_2$， 我们采用卷积层将$L_1$的输出进行卷积。 对于大小为$N_s*1*78$的输入， 卷积核大小为$1*1$,  也就是在空间域分别对每一个神经元进行卷积， 设置$5N_s$个卷积核， 其中$N_s$为$L_1$的节点数（深度）。 然后， 我们在L2后面接一层降采样层和激励层（考虑到画图简洁性并未在图中画出）。 降采样层分别在高、宽进行长为13，1的降采样， 降采样stride为13，也就是进行无重合的降采样， 并将得到的结果输入激励层进行非线性映射， 这里我们采用非线性函数$Relu$。
 	
 	\item $L_3$ 全连接层\\
-	\item $L_4$ 全连接层\\
-	\item $L_5$ Loss层\\
-\end{enumerate}
+	全连接层设置100个节点， 与$L_2$全连接。经过降采样，$L_2$输出共有$5N_s*6$个节点， 设置全连接层有100个节点， 那么$L_3$中共有$5N_S*6*100$个连接。
 
+	\item $L_4$ 全连接层\\
+	和$L_3$层类似， $L_4$也设置为全连接层，由于是二类分类， 我们设置$L_4$为预测输出， 即只有两个节点， 一个表示正样本（有P300波形）， 一个表示负样本（没有P300波形）。 在预测时， 我们取前向网络计算所得值大的作为类别输出。 在训练时， 我们将其输入$L_5$ loss层。
+
+	\item $L_5$ Loss层\\
+	在训练时， 最后我们将预测样本类别概率与真实样本标号输入loss层求loss以便通过误差反传算法训练网络。
+
+\end{enumerate}
 
 
 \begin{figure*}[htb]
@@ -478,8 +485,129 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
   \caption{ConvP300Net}\label{fig:p300cnn_network}
 \end{figure*}
 
+
 \section{实验结果及实现}\label{sec:cnn_experiment}
 
+
+
+
+\subsection{PConv的学习}\label{sec:weighted_loss}
+整个网络的学习采用误差反传算法， 从后往前对每一层分别求导将误差传回， 如第\ref{sec:train_net}节所示。 但有两点不同， 一是在PConv中， 我们采用不同的loss函数， 二是选用Relu非线性映射， 但是该函数在零点不可导， 下面我们来分别说明。 
+\begin{enumerate}
+	\item Loss 层的设计
+		由表\ref{tab:p300_experiment_conf}可知， 该样本存在正负样本不均衡的问题， 正样本与负样本比例为1：5。 因此我们考虑样本均衡方法， 如Hubert的工作中分别设置了5个分类器， 每个分类器用全部正样本和$\frac{1}{5}$的负样本做训练。 但是， 这样还需要考虑到后续分类器做融合时ensemble learning带来的提升效果。 为了在同一个网络中进行训练并作性能测试， 我们更改loss层定义， 改用weighted loss。 
+		在weighted loss中， 我们受boosting启发\cite{}， 赋给正样本较大权重， 赋给负样本较小权重。 这样在调整的时候就可以更注重正样本的调整。 采用euclidean loss, 其loss定义如下：
+
+\begin{equation}
+	L(f(x),y) = g(y)(f(x) - y)^2
+\end{equation}
+
+	\item 非线性映射 Relu
+\end{enumerate}
+
+
+
+\subsection{实验结果}
+在实验中， 我们将我们的方法与Hubert Cecotti的结果做以比较， 用了以下评价标准：
+\begin{enumerate}
+	\item TP
+	TP为true positive 的缩写， 表示分正确的正样本数。
+
+	\item TN
+	TN为true negative的缩写， 表示分正确的负样本数。
+
+	\item FP
+	FP为false positive的缩写， 表示错分成正样本（实际是负样本）的数目。
+
+	\item FN
+	FN为false negative的缩写， 表示错分成负样本（实际是正样本）的数目。
+
+	\item Reco.
+	Reco. 为recognition rate的缩写， 识别率， 表示所有样本中分对的比例。
+
+	\item Recall
+	Recall （召回率）表示分对的正样本数占所有分对样本数的比例， 即
+	\begin{equation}
+		Recall = \frac{TP}{TP+TN}
+	\end{equation}
+
+	\item Precision
+	Precision(精度) 表示分对的正样本数占所有估计成正样本的样本中的比例， 即
+	\begin{equation}
+		Precision = \frac{TP}{TP+FP}
+	\end{equation}
+
+	\item F-value
+	作为一个综合评价指标， F-value将Recall 和 Precision都考虑了进来：
+	\begin{equation}
+		F-value = 2\frac{Recall \cdot Precision}{Recall+Precision}
+	\end{equation}
+\end{enumerate}
+
+
+采用各网络时， A, B两个人的结果分别如表\ref{tab:p300_cnn_A}， \ref{tab:p300_cnn_B}所示。 其中， CNN1, CNN3, MCNN1, MCNN3 \cite{}的基本模型一样， 且也是采用卷积神经网络对数据进行建模。 不同之处是， $L_1$采用卷积神经网络， 在数据78个时间点的每个时间点共享空间域64个通道的权值； $L_2$采用先降采样后卷积（而非我们方法中的先卷积后降采样）的策略以降低模型复杂度，且采用tanh作为激励函数（而我们的PCNN, PsCNN, PwCNN, PConv方法均选用Relu）。 我们将该模型记为CNN1。
+在CNN1的基础上， CNN3 在$L_1$中只设置一个节点， 也就是说$L_1$的深度为1。 此外， 如表\ref{tab:p300_experiment_conf}所示， 该样本存在正负样本不均衡的问题， 正样本与负样本比例为1：5。 为解决该问题， MCNN中提出用多个分类器。 在MCNN1中，将所有负样本分为5份， 用5个分类器分别训练全部正样本加$\frac{1}{5}$的负样本。 在MCNN3中，为了避免网络随机参数初始化带来的波动问题选用了3个分类器中最好的结果作为最后的分类结果。 与CNN1相比， 我们的PCNN方法将$L_2$中的降采样与卷积交换顺序， 即先卷积， 后降采样， 这是因为参考其他网络（如LeNet， AlexNet）都是先做卷积再做pooling， 而且这样可以提高模型参数规模， 更好地拟合数据； PsCNN在PCNN的基础上在$L_4$输出概率后加了一层非线性映射， 希望提高模型适应性； PwCNN是PCNN加了weighted loss版本，详见第\ref{sec:weighted_loss}节； 在PwCNN的基础上， PConv模型将第一层从卷积层改为局部连接层， 使得64维通道的权重在不同时间点不共享。 
+
+
+
+\begin{table}[ht]
+\centering
+  \begin{tabular}{|c||c|c|c|c|c|c|c|c|}
+  \hline
+   & TP & TN & FP & FN & Reco.(\%) & Recall & Precision & F-value \\
+  \hline\hline
+   CNN1 & 2021 & 10645 & 4355 & 979 & 70.37 &  0.674 & 0.407 & 0.509\\
+  \hline
+   CNN3 & 2006 & 11348 & 3652 & 994 & 74.189 & 0.669 & 0.355 & 0.463\\
+  \hline
+   MCNN1 & 2202 &11453 & 3547 & 798 & 75.861 & 0.734 & 0.383 & 0.503 
+ \hline
+  MCNN3 & 2077 & 11997 & 3003 & 923 & 78.189 & 0.692 & 0.409 & 0.514 \\
+\hline
+  PCNN & 2145 & 12114 & 2886 & 855 & 79.217  & 0.715  & 0.426 & 0.534 \\
+\hline
+  PsCNN & 2194 &12383 & 2617 & 806 & 80.983 & 0.731 & 0.456 & 0.562 \\
+\hline
+  PwCNN & 2276 & 12745 & 2255 & 724 & 83.450 & 0.759 & 0.502 & 0.604 \\
+\hline 
+  PConv & 2537 & 12679 & 2321 & 463 & 84.533 & 0.846 & 0.522 & 0.646 \\
+  \hline
+  \end{tabular}
+  \caption{实验人A —— P300 检测各卷积神经网络结果（结果没更新上去）}
+  \centering \label{tab:p300_cnn_A}
+\end{table}
+
+
+\begin{table}[ht]
+\centering
+  \begin{tabular}{|c||c|c|c|c|c|c|c|c|}
+  \hline
+   & TP & TN & FP & FN & Reco.(\%) & Recall & Precision & F-value \\
+  \hline\hline
+   CNN1 & 2035 & 12039 & 2961 & 965 & 78.189 &  0.678 & 0.407 & 0.509\\
+  \hline
+   CNN3 & 2006 & 11348 & 3652 & 994 & 74.189 & 0.669 & 0.355 & 0.463\\
+  \hline
+   MCNN1 & 2202 &11453 & 3547 & 798 & 75.861 & 0.734 & 0.383 & 0.503 
+ \hline
+  MCNN3 & 2077 & 11997 & 3003 & 923 & 78.189 & 0.692 & 0.409 & 0.514 \\
+\hline
+  PCNN & 2145 & 12114 & 2886 & 855 & 79.217  & 0.715  & 0.426 & 0.534 \\
+\hline
+  PsCNN & 2194 &12383 & 2617 & 806 & 80.983 & 0.731 & 0.456 & 0.562 \\
+\hline
+  PwCNN & 2276 & 12745 & 2255 & 724 & 83.450 & 0.759 & 0.502 & 0.604 \\
+\hline 
+  PConv & 2537 & 12679 & 2321 & 463 & 84.533 & 0.846 & 0.522 & 0.646 \\
+  \hline
+  \end{tabular}
+  \caption{实验人B —— P300 检测各卷积神经网络结果}
+  \centering \label{tab:p300_cnn_B}
+\end{table}
+
+
+
+我们将PConv, PwCNN, PsCNN的训练loss随迭代次数下降的曲线画出来， 如图\ref{fig:train_loss}所示。 可见， PConv和PwCNN的训练loss下降曲线类似， 而加了sigmoid非线性映射后， PsCNN很快下降后几乎损失函数不降了。 这是因为加了sigmoid后原本概率被映射到[0,1]，使得误差非零即一。  大约5次迭代后达到收敛。
 
 
 \begin{figure*}[htb]
@@ -488,6 +616,44 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
   \includegraphics[scale=0.8]{Pictures/CNN/train_loss.png}
   \caption{ConvP300Net 训练loss-迭代次数}\label{fig:train_loss}
 \end{figure*}
+
+
+将PConv, PwCNN, PsCNN的测试loss随迭代次数变化的曲线画在图\ref{fig:test_loss}。 如图可见， 在测试集上的loss总体上呈下降趋势， 但可能存在局部波动。 最后， 我们将三种方法的测试准确率展现在图\ref{test_acc}中。 将准确率定义为Reco.，可见， 三种方法的测试准确率都较为稳定， PConv的准确率最佳。
+
+
+\begin{figure*}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[scale=0.8]{Pictures/CNN/test_loss.png}
+  \caption{ConvP300Net 训练loss-迭代次数}\label{fig:test_loss}
+\end{figure*}
+
+\begin{figure*}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[scale=0.8]{Pictures/CNN/test_accuracy.png}
+  \caption{ConvP300Net 训练loss-迭代次数}\label{fig:test_acc}
+\end{figure*}
+
+
+
+
+\subsection{实现方法}
+我们的实现基于Berkeley 大学Jia Yangqing实现的Caffe\cite{}， 为开源代码。 它可以实现在CPU和GPU上运行， 这里我们选用的GPU为NVIDIA出的GT Force 580。 基于cuda进行并行加速。 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
