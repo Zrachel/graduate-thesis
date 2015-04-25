@@ -60,7 +60,8 @@ Connectionist Temporal Classification（CTC）\cite{graves2012connectionist}训�
 
 
 
-\section{RNN网络结构}
+\section{循环神经网络网络结构}
+\subsection{RNN网络结构}
 
 首先我们来看RNN的结构：
 RNN包含一些用带权连接的单元，每个单元有一个在时间$t$更新的激活函数$y(t), t=1,2,…$。对单元$i$的激活$y^{i}$通过计算网络中与$i$的相连输入$net^{l}(t)$得到：
@@ -114,8 +115,7 @@ $\partial w_{im} = -\alpha \frac{\partial E(t)}{\partial w_{im}}$，其中$\alph
 
 
 
-
-\section{LSTM的网络结构}
+\subsection{LSTM的网络结构}
 LSTM通过设置恒定的传递误差来解决上面提到的问题。在基本LSTM单元中，LSTM引入了一个自连接线性单元，称作误差旋转木马（error carousel）, 恒定的传递误差中设定权重$w$恒等于1，$f$为线性函数，目的是这各部分只起到传递误差的作用，而将学习参数作用于其他权重。
 
 粗略地表示，我们在第一章中简单介绍了LSTM。它以memory block作为基本单元，其中包含一个至多个memory cell，典型的LSTMmemory cell如图\ref{Fig:lstm_simple}所示：
@@ -132,8 +132,7 @@ LSTM通过设置恒定的传递误差来解决上面提到的问题。在基本L
 在这个核心周围是非线性可适应神经元，用来学习非线性神经动作。图中蓝色神经元用来表示输入，三个绿色神经元分别表示三个门（左边的是忘记门，右下角为输入门，右上角为输出门），这些门通过学习来使核心线性神经元不受无关事件和误差信号的干扰，而又能通过有效信息更新网络参数，即门是否打开来决定信号的有效性。最后，紫色圆点用以表示乘积操作。LSTM的学习算法是非常高效的,每个边权的计算复杂度不超过O(1)。
 
 
-LSTM的应用中，可以将多个memory cell进行组合，如图\ref{Fig:lstm_mixture}所示混合模型。其中有两个memory cell，分别从输入和输入门接受输入，……
-。
+LSTM的应用中，可以将多个memory cell进行组合，如图\ref{Fig:lstm_mixture}所示混合模型。其中有两个memory cell，分别从输入和输入门接受输入，每个cell将输出结果分别传给另一个memory cell的输入， 输入门， 输出门和忘记门。 但实际应用中，通常将一至多个memory cell组合成memory block，共享输入，输出，忘记门的权重（而不共享输入的权重），这样可以减少自适应参数的数量，同时使block内部各cell起到不同作用。 
 
 \begin{figure}[htb]
   \centering
@@ -142,4 +141,11 @@ LSTM的应用中，可以将多个memory cell进行组合，如图\ref{Fig:lstm_
   \caption{LSTM混合模型}\label{Fig:lstm_mixture}
 \end{figure}
 
-但实际应用中，通常将一至多个memory cell组合成memory block，共享输入，输出，忘记门的权重（而不共享输入的权重），这样可以减少自适应参数的数量，同时使block内部各cell起到不同作用。
+
+
+\section{LSTMP300Net}
+
+在这一节中， 我们利用LSTM进行P300分类。 如第三章数据集介绍， 这里我们应用同样的P300波形进行P300检测。 由于P300信号为采集的时序信号， 所以采用时序模型更为合适。 
+
+
+

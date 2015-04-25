@@ -1,8 +1,13 @@
 \begin{englishabstract}
-The quick brown fox jump over the lazy dog.
+Brain Machine Interface (BMI) is an interface that connect neurons of brain and devices to communicate and control. BMI can substitute impaired neural system, provide automatic service to disabled people through four steps: sampling signal from brain, signal processing, signal decoding to computer instruction, and feedback. This thesis focus on invasive electroneurographic signal processing, compression and P300 wavelet detection in Electroencephalograph signal. 
 
-\TeX\index{\TeX}
+Invasive electroneurographic signal with high sampling rate and multiple channel can represent high-resolution information. However, the huge quantity of data makes compression indispensable. 
+In the aspect of signal compression, some related work focus on non-invasive electroneurographic signal. These methods take the consideration of signal characteristics. However, power centralizes in low frequency for non-invasive neural signal, therefore signal can be compressed through low pass filter directly. But the high frequency part of invasive BCI includes action potential (spike), which can be decoded effectively. As a consequence, traditional compression methods cannot be directly used in invasive BCI. In this thesis, we explore the characteristics of electroneurographic signal from motor cortex and provide a high fidelity compression framework for it. 
 
-\englishkeywords{\TeX}
+On the other hand, non-invasive BMI provides low-resolution data easily, like Electroencephalograph, which is popular in  neural signal decoding. As a pre task of machine execution, neural signal decoding is the core of BCI. Here we process and detect P300 wave, which is a prework of EEG signal decoding. In this thesis, we apply deep learning method to P300 wavelet detection, build convolutional neural network and recurrent neural network for EEG signal, and boost detection accuracy from both temporal and spatial dimension.
+
+
+
+\englishkeywords{Brain Machine Interface, compression, Convolutional neural network, Long Short Term Memory, Recurrent Neural Network}
 
 \end{englishabstract}

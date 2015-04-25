@@ -184,7 +184,7 @@ kelley1960cutting,bryson1961diffraction,}从变分法中的欧拉-拉格朗日�
 \end{figure*}
 
 
-对于多层网络， 考虑如何计算反向传播误差$delta_{i}$。 对于整个网络的输出单元$net_n$， 可以直接算得$\delta_n = \frac{\partial L}{\partial net_n}$， 例如对于$L$取square loss的情况， 有
+对于多层网络， 考虑如何计算反向传播误差$\delta_{i}$。 对于整个网络的输出单元$net_n$， 可以直接算得$\delta_n = \frac{\partial L}{\partial net_n}$， 例如对于$L$取square loss的情况， 有
 
 
 \begin{equation}
@@ -344,7 +344,7 @@ S(t) = \frac{e^{t}}{\sum_{l=1}^k{e^t}}\label{Eq:softmax}
 通常，我们希望输入数据是经过规则化（normalization）的， 即对数据进行白化（whiten）， 以减少数据variance产生的波动， 通过减均值，除以方差完成。 该层通常加在数据层之前。
 
 \item 激励层\\
-如果卷积神经网络中， 卷积层经过线性组合之后不加非线性函数的话， 那么整个网络就完全可以有一个线性函数来表示了。 为了增强模型的表达能力， 我们加入非线性层， 使所得结果 稀疏化， 或者得到侧抑制， 我们也称非线性层为激励层， 相应的非线性函数称为激励函数。 通常， 我们所用的非线性函数有Rectification（ReLU, 如式\ref{Eq:relu}）， Component-wise shrinkage, tanh（如式\ref{Eq:tanh}）和winner-takes-all。
+如果卷积神经网络中， 卷积层经过线性组合之后不加非线性函数的话， 那么整个网络就完全可以有一个线性函数来表示了。 为了增强模型的表达能力， 我们加入非线性层， 使所得结果 稀疏化， 或者得到侧抑制， 我们也称非线性层为激励层， 相应的非线性函数称为激励函数。 通常， 我们所用的非线性函数有rectified linear units（ReLU, 如式\ref{Eq:relu}）， Component-wise shrinkage, tanh（如式\ref{Eq:tanh}）, sigmoid（如式\ref{Eq:sigmoid}）和winner-takes-all。
 
 \begin{equation}\label{Eq:relu}
  relu(x) = max(x,0)
@@ -354,6 +354,9 @@ S(t) = \frac{e^{t}}{\sum_{l=1}^k{e^t}}\label{Eq:softmax}
  tanh(x) = \frac{1-e^{-2x}}{1+e^{-2x}}
 \end{equation}
 
+\begin{equation}\label{Eq:sigmoid}
+ sigmoid(w,x) = \frac{1}{1+e^{w^Tx}}
+\end{equation}
 \end{enumerate}
 
 综上， 现在用的卷积神经网络每个卷积层经过数据规则化， 卷积， 非线性激励， 池化（降采样） 四个模块。 整个卷积神经网络如图\ref{fig:whole_cnn_form}所示。
@@ -373,7 +376,7 @@ S(t) = \frac{e^{t}}{\sum_{l=1}^k{e^t}}\label{Eq:softmax}
 
 \subsection{CNN网络训练}
 
-CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优化。 随机梯度下降算法源于随机优化。 随机优化在统计学习理论中非常常见， 即求参数$\theta$来最小化loss的期望。
+CNN模型通常用随机梯度下降\cite{nemirovski1978cezari,speelpenning1980compiling}算法进行优化。 随机梯度下降算法源于随机优化。 随机优化在统计学习理论中非常常见， 即求参数$\theta$来最小化loss的期望。
 
 
 \begin{equation}
@@ -494,15 +497,51 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
 \subsection{PConv的学习}\label{sec:weighted_loss}
 整个网络的学习采用误差反传算法， 从后往前对每一层分别求导将误差传回， 如第\ref{sec:train_net}节所示。 但有两点不同， 一是在PConv中， 我们采用不同的loss函数， 二是选用Relu非线性映射， 但是该函数在零点不可导， 下面我们来分别说明。 
 \begin{enumerate}
-	\item Loss 层的设计
+	\item Loss 层的设计\\
 		由表\ref{tab:p300_experiment_conf}可知， 该样本存在正负样本不均衡的问题， 正样本与负样本比例为1：5。 因此我们考虑样本均衡方法， 如Hubert的工作中分别设置了5个分类器， 每个分类器用全部正样本和$\frac{1}{5}$的负样本做训练。 但是， 这样还需要考虑到后续分类器做融合时ensemble learning带来的提升效果。 为了在同一个网络中进行训练并作性能测试， 我们更改loss层定义， 改用weighted loss。 
 		在weighted loss中， 我们受boosting启发\cite{}， 赋给正样本较大权重， 赋给负样本较小权重。 这样在调整的时候就可以更注重正样本的调整。 采用euclidean loss, 其loss定义如下：
 
 \begin{equation}
-	L(f(x),y) = g(y)(f(x) - y)^2
+	L(f(x),y) = \sum_{i=1}^N {g(y_i)(f(x_i) - y_i)^2}
 \end{equation}
+其中$g(y)$为根据$y$设置的权重：
+\begin{equation*}
+  g(y)=\left\{
+    \begin{array}{lr}
+        \frac{1}{6}, \,\, if\,\, y=1\\
+        \frac{5}{6}, \,\, if\,\, y=-1\\
+    \end{array}
+  \right.
+\end{equation*}
+所以， 
+\begin{equation}
+	L(net_n,y) = \frac{1}{2}[\frac{5}{6}(y+1) + \frac{1}{6}(1-y)](net_n-y)^2
+\end{equation}
+	而后其更新可以根据算法\ref{algo:BP_basic}得到, 第n层的反向传播误差为：
+	
+\begin{equation}
+	\delta_n = \frac{\partial L}{\partial net_n} = [\frac{5}{6}(y+1) + \frac{1}{6}(1-y)](net_n-y)
+\end{equation}
+	而对之前的隐层节点$net_j$, 通过链式求导法则可得，
+\begin{equation}
+	\delta_j = \sum_k{\delta_k\cdot w_{jk}f'(net_j)}
+\end{equation}	
+	其中$k$是所有与j节点相连的下一层节点编号。
+	
+	
 
-	\item 非线性映射 Relu
+	\item 非线性映射 Relu\\
+	神经网络的非线性激活函数有多种选择， sigmoid, tanh 和 ReLU的表达式我们已经在上文中介绍过， 其图形如图\ref{Fig:activation}所示。 很多工作中显示ReLU有助于提升卷积神经网络的效果\cite{Rectifier Nonlinearities Improve Neural Network Acoustic Models,Deep sparse rectifier neural networks}。 其区别主要是sigmoid函数的值域在[0,1]而ReLU的值域在0到正无穷。 所以sigmoid可以用来为概率建模， 而ReLU可以为正实数建模。 然而， 从图\ref{Fig:activation}可知ReLU在0处不可导， 所以ReLU采用分段求导（x<0时g'(x)=0,x>0是g'(x)=1）。
+	
+	\begin{figure*}[htb]
+  	\centering
+  	% Requires \usepackage{graphicx}
+  	\includegraphics[scale=0.8]{Pictures/CNN/activation.jpg}
+  	\caption{激励函数sigmoid,tanh,ReLu,softplus}\label{Fig:activation}
+	\end{figure*}
+	
+	相比其他非线性映射函数， ReLU有一些显著优势。 首先， 它具有sparse约束性， 因为从概率角度， 只有50\%的神经元被激活。 其次， ReLU具有没有tanh， sigmoid的梯度vanishing和exploding问题\cite{Rectified linear units improve restricted boltzmann machines}。 最后， ReLU具有计算简单的性质， 所以更为高效。
+	
 \end{enumerate}
 
 
@@ -510,34 +549,34 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
 \subsection{实验结果}
 在实验中， 我们将我们的方法与Hubert Cecotti的结果做以比较， 用了以下评价标准：
 \begin{enumerate}
-	\item TP
-	TP为true positive 的缩写， 表示分正确的正样本数。
+	\item TP,
+	true positive 的缩写， 表示分正确的正样本数。
 
-	\item TN
-	TN为true negative的缩写， 表示分正确的负样本数。
+	\item TN,
+	true negative的缩写， 表示分正确的负样本数。
 
-	\item FP
-	FP为false positive的缩写， 表示错分成正样本（实际是负样本）的数目。
+	\item FP,
+	false positive的缩写， 表示错分成正样本（实际是负样本）的数目。
 
-	\item FN
-	FN为false negative的缩写， 表示错分成负样本（实际是正样本）的数目。
+	\item FN,
+	false negative的缩写， 表示错分成负样本（实际是正样本）的数目。
 
-	\item Reco.
-	Reco. 为recognition rate的缩写， 识别率， 表示所有样本中分对的比例。
+	\item Reco.,
+	recognition rate表示识别率， 表示所有样本中分对的比例。
 
-	\item Recall
-	Recall （召回率）表示分对的正样本数占所有分对样本数的比例， 即
+	\item Recall,
+	召回率表示分对的正样本数占所有分对样本数的比例， 即
 	\begin{equation}
 		Recall = \frac{TP}{TP+TN}
 	\end{equation}
 
-	\item Precision
-	Precision(精度) 表示分对的正样本数占所有估计成正样本的样本中的比例， 即
+	\item Precision,
+	精度表示分对的正样本数占所有估计成正样本的样本中的比例， 即
 	\begin{equation}
 		Precision = \frac{TP}{TP+FP}
 	\end{equation}
 
-	\item F-value
+	\item F-value,
 	作为一个综合评价指标， F-value将Recall 和 Precision都考虑了进来：
 	\begin{equation}
 		F-value = 2\frac{Recall \cdot Precision}{Recall+Precision}
@@ -545,7 +584,7 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
 \end{enumerate}
 
 
-采用各网络时， A, B两个人的结果分别如表\ref{tab:p300_cnn_A}， \ref{tab:p300_cnn_B}所示。 其中， CNN1, CNN3, MCNN1, MCNN3 \cite{}的基本模型一样， 且也是采用卷积神经网络对数据进行建模。 不同之处是， $L_1$采用卷积神经网络， 在数据78个时间点的每个时间点共享空间域64个通道的权值； $L_2$采用先降采样后卷积（而非我们方法中的先卷积后降采样）的策略以降低模型复杂度，且采用tanh作为激励函数（而我们的PCNN, PsCNN, PwCNN, PConv方法均选用Relu）。 我们将该模型记为CNN1。
+采用各网络时， A, B两个人的结果分别如表\ref{tab:p300_cnn_A}， \ref{tab:p300_cnn_B}所示。 其中， CNN1, CNN3, MCNN1, MCNN3 \cite{cecotti2011convolutional}的基本模型一样， 且也是采用卷积神经网络对数据进行建模。 不同之处是， $L_1$采用卷积神经网络， 在数据78个时间点的每个时间点共享空间域64个通道的权值； $L_2$采用先降采样后卷积（而非我们方法中的先卷积后降采样）的策略以降低模型复杂度，且采用tanh作为激励函数（而我们的PCNN, PsCNN, PwCNN, PConv方法均选用Relu）。 我们将该模型记为CNN1。
 在CNN1的基础上， CNN3 在$L_1$中只设置一个节点， 也就是说$L_1$的深度为1。 此外， 如表\ref{tab:p300_experiment_conf}所示， 该样本存在正负样本不均衡的问题， 正样本与负样本比例为1：5。 为解决该问题， MCNN中提出用多个分类器。 在MCNN1中，将所有负样本分为5份， 用5个分类器分别训练全部正样本加$\frac{1}{5}$的负样本。 在MCNN3中，为了避免网络随机参数初始化带来的波动问题选用了3个分类器中最好的结果作为最后的分类结果。 与CNN1相比， 我们的PCNN方法将$L_2$中的降采样与卷积交换顺序， 即先卷积， 后降采样， 这是因为参考其他网络（如LeNet， AlexNet）都是先做卷积再做pooling， 而且这样可以提高模型参数规模， 更好地拟合数据； PsCNN在PCNN的基础上在$L_4$输出概率后加了一层非线性映射， 希望提高模型适应性； PwCNN是PCNN加了weighted loss版本，详见第\ref{sec:weighted_loss}节； 在PwCNN的基础上， PConv模型将第一层从卷积层改为局部连接层， 使得64维通道的权重在不同时间点不共享。 
 
 
@@ -556,24 +595,24 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
   \hline
    & TP & TN & FP & FN & Reco.(\%) & Recall & Precision & F-value \\
   \hline\hline
-   CNN1 & 2021 & 10645 & 4355 & 979 & 70.37 &  0.674 & 0.407 & 0.509\\
-  \hline
-   CNN3 & 2006 & 11348 & 3652 & 994 & 74.189 & 0.669 & 0.355 & 0.463\\
-  \hline
-   MCNN1 & 2202 &11453 & 3547 & 798 & 75.861 & 0.734 & 0.383 & 0.503 
- \hline
-  MCNN3 & 2077 & 11997 & 3003 & 923 & 78.189 & 0.692 & 0.409 & 0.514 \\
-\hline
-  PCNN & 2145 & 12114 & 2886 & 855 & 79.217  & 0.715  & 0.426 & 0.534 \\
-\hline
-  PsCNN & 2194 &12383 & 2617 & 806 & 80.983 & 0.731 & 0.456 & 0.562 \\
-\hline
-  PwCNN & 2276 & 12745 & 2255 & 724 & 83.450 & 0.759 & 0.502 & 0.604 \\
-\hline 
-  PConv & 2537 & 12679 & 2321 & 463 & 84.533 & 0.846 & 0.522 & 0.646 \\
+	CNN1 & 2021 & 10645 & 4355 & 979 & 70.367  & 0.674  & 0.317  & 0.431 \\
+	\hline
+	CNN3 & 1827 & 10554 & 4446 & 1173 & 68.783  & 0.609  & 0.291  & 0.394 \\
+	\hline
+	MCNN1 & 2071 & 10348 & 4652 & 929 & 68.994  & 0.690  & 0.308  & 0.426 \\
+	\hline
+	MCNN3 & 2023 & 10645 & 4355 & 977 & 70.378  & 0.674  & 0.317  & 0.431 \\
+	\hline
+	PCNN & 2079 & 10597 & 4403 & 921 & 70.422  & 0.693  & 0.321  & 0.439 \\
+	\hline
+	PsCNN & 2013 & 10483 & 4517 & 987 & 69.422  & 0.671  & 0.308  & 0.422 \\
+	\hline
+	PwCNN & 2194 & 11071 & 3929 & 806 & 73.694  & 0.731  & 0.358  & 0.481 \\
+	\hline
+	PConv & 2216 & 11402 & 3598 & 784 & 75.656  & 0.739  & 0.381  & 0.503 \\
   \hline
   \end{tabular}
-  \caption{实验人A —— P300 检测各卷积神经网络结果（结果没更新上去）}
+  \caption{实验人A —— P300 检测各卷积神经网络结果}
   \centering \label{tab:p300_cnn_A}
 \end{table}
 
@@ -588,7 +627,7 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
   \hline
    CNN3 & 2006 & 11348 & 3652 & 994 & 74.189 & 0.669 & 0.355 & 0.463\\
   \hline
-   MCNN1 & 2202 &11453 & 3547 & 798 & 75.861 & 0.734 & 0.383 & 0.503 
+   MCNN1 & 2202 &11453 & 3547 & 798 & 75.861 & 0.734 & 0.383 & 0.503 \\
  \hline
   MCNN3 & 2077 & 11997 & 3003 & 923 & 78.189 & 0.692 & 0.409 & 0.514 \\
 \hline
@@ -613,53 +652,31 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari}算法进行优�
 \begin{figure*}[htb]
   \centering
   % Requires \usepackage{graphicx}
-  \includegraphics[scale=0.8]{Pictures/CNN/train_loss.png}
+  \includegraphics[scale=0.9]{Pictures/CNN/train_loss.png}
   \caption{ConvP300Net 训练loss-迭代次数}\label{fig:train_loss}
 \end{figure*}
 
 
-将PConv, PwCNN, PsCNN的测试loss随迭代次数变化的曲线画在图\ref{fig:test_loss}。 如图可见， 在测试集上的loss总体上呈下降趋势， 但可能存在局部波动。 最后， 我们将三种方法的测试准确率展现在图\ref{test_acc}中。 将准确率定义为Reco.，可见， 三种方法的测试准确率都较为稳定， PConv的准确率最佳。
+将PConv, PwCNN, PsCNN的测试loss随迭代次数变化的曲线画在图\ref{fig:test_loss}。 如图可见， 在测试集上的loss总体上呈下降趋势， 但可能存在局部波动。 最后， 我们将三种方法的测试准确率展现在图\ref{fig:test_acc}中。 可见， 三种方法的测试准确率都较为稳定， PConv的准确率最佳。
 
 
 \begin{figure*}[htb]
   \centering
   % Requires \usepackage{graphicx}
-  \includegraphics[scale=0.8]{Pictures/CNN/test_loss.png}
-  \caption{ConvP300Net 训练loss-迭代次数}\label{fig:test_loss}
+  \includegraphics[scale=0.9]{Pictures/CNN/test_loss.png}
+  \caption{ConvP300Net 测试loss-迭代次数}\label{fig:test_loss}
 \end{figure*}
 
 \begin{figure*}[htb]
   \centering
   % Requires \usepackage{graphicx}
-  \includegraphics[scale=0.8]{Pictures/CNN/test_accuracy.png}
-  \caption{ConvP300Net 训练loss-迭代次数}\label{fig:test_acc}
+  \includegraphics[scale=0.9]{Pictures/CNN/test_accuracy.png}
+  \caption{ConvP300Net 测试准确率-迭代次数}\label{fig:test_acc}
 \end{figure*}
 
 
 
 
 \subsection{实现方法}
-我们的实现基于Berkeley 大学Jia Yangqing实现的Caffe\cite{}， 为开源代码。 它可以实现在CPU和GPU上运行， 这里我们选用的GPU为NVIDIA出的GT Force 580。 基于cuda进行并行加速。 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+我们的实现基于Berkeley Vision and Learning Center 的Yangqing Jia开发实现的Caffe\cite{jia2014caffe}， 为开源代码。 它可以实现在CPU和GPU上运行， 这里我们选用的GPU为NVIDIA出的GT Force 580， 基于cuda进行并行加速。 Caffe用纯C++实现，提供了Python，Matlab脚本和命令行接口。 通过配置文件可以定义网络结构和参数配置。 实验中， 我们将数据经过以下处理， 先将所有数据分为多个batches。 如15300个训练数据分为100个batch，其中95\%作为训练数据， 5\%作为测试数据， 每个batch有153个数据。 然后经过leveldb将数据转换成kv存储， 然后在网络中进行训练。 数据在整个网络中都通过块（blob）的形式定义。 在caffe的基础上， 本文在数据层进行数据生成与转换， 在layer中增加了weighted euclidean loss层， 并调整网络结构。
 
