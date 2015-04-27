@@ -13,7 +13,7 @@ Deep Neural Network(DNN)通常在较难的learning问题上能够达到比较好
 然而，Schmidhuber的学生Hochreiter在他的博士论文\cite{hochreiter1991untersuchungen}中指出了RNN的缺点：vanishing or exploding gradients:
 在传统RNN中，反传的误差要不就收缩太快，要不就爆发超出界限。事实上误差会随着网络层数而指数型衰减或爆发，因此很难训练, 而且不能处理长时间延时事件。
 
-之后Hochereiter提出了一种新型的RNN——长短时间记忆Long Short-Term Memory \cite{hochreiter1997long}，它在涉及很长一段时间延时的任务上比传统RNNs更好。LSTM网络中的基本单元是包含一个或多个存储单元（memory cell）和所有cell共享的三个自适应乘法门（图2）的存储块（memory block）。每个存储单元都在其中心有一个自连接单元，我们称之为“恒误差旋转木马”（ Constant Error Carousel， CEC ），它本质上是一个无参数的线性单元。通过无限循环地进行激活和误差信号传递，CEC可以在延长的时间段内提供短期存储。Gers et al在LSTM中安置了忘记门 \cite{gers2000learning}。输入，忘记和输出门可以通过训练分别进行学习,即学会将什么信息存入，怎样保存，什么时候读出。
+之后Hochereiter提出了一种新型的RNN——长短时间记忆Long Short-Term Memory \cite{hochreiter1997long}，它在涉及很长一段时间延时的任务上比传统RNNs更好。LSTM网络中的基本单元是包含一个或多个存储单元（memory cell）和所有cell共享的三个自适应乘法门的存储块（memory block）。每个存储单元都在其中心有一个自连接单元，我们称之为“恒误差旋转木马”（ Constant Error Carousel， CEC ），它本质上是一个无参数的线性单元。通过无限循环地进行激活和误差信号传递，CEC可以在延长的时间段内提供短期存储。Gers et al在LSTM中安置了忘记门 \cite{gers2000learning}。输入，忘记和输出门可以通过训练分别进行学习,即学会将什么信息存入，怎样保存，什么时候读出。
 
  
 
@@ -126,7 +126,7 @@ LSTM通过设置恒定的传递误差来解决上面提到的问题。在基本L
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics{Pictures/LSTM/lstm_simple.png}\\
-  \caption{LSTM模型}\label{Fig:lstm_simple}
+  \caption{LSTM模型Memory block结构}\label{Fig:lstm_simple}
 \end{figure}
 
 在这个核心周围是非线性可适应神经元，用来学习非线性神经动作。图中蓝色神经元用来表示输入，三个绿色神经元分别表示三个门（左边的是忘记门，右下角为输入门，右上角为输出门），这些门通过学习来使核心线性神经元不受无关事件和误差信号的干扰，而又能通过有效信息更新网络参数，即门是否打开来决定信号的有效性。最后，紫色圆点用以表示乘积操作。LSTM的学习算法是非常高效的,每个边权的计算复杂度不超过O(1)。
