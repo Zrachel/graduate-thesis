@@ -1,6 +1,6 @@
-\chapter{基于循环神经网络的信号解码}
+\chapter{基于循环神经网络的脑电P300检测方法}
 
-\section{循环神经网络(RNN)}
+\section{循环神经网络}
 
 人类可以很快地识别节奏模式序列，即那些有时间间隔的子模式。此外，鼓手等演奏者也能根据运动命令生成有精确时间节奏的节奏序列。这促使人们研究人工系统，去分离或产生通过事件间时间间隔长度传递信息的模式。
 
@@ -143,9 +143,74 @@ LSTM的应用中，可以将多个memory cell进行组合，如图\ref{Fig:lstm_
 
 
 
-\section{LSTMP300Net}
+\section{LSTMP300Net进行P300检测}
 
-在这一节中， 我们利用LSTM进行P300分类。 如第三章数据集介绍， 这里我们应用同样的P300波形进行P300检测。 由于P300信号为采集的时序信号， 所以采用时序模型更为合适。 
+在这一节中， 我们利用LSTM进行P300分类。 如第三章数据集介绍， 这里我们应用同样的P300波形进行P300检测。 
+
+\subsection{网络结构}
+在P300检测任务中， 我们设置LSTM的网络结构LSTMP300Net如图\ref{Fig:LSTMP300Net}所示。 共设有一个输入层， 一个输出层， 中间3个隐层。 其中， 三个隐层$LSTM_1$,$LSTM_2$,$LSTM_3$ 均为LSTM层， 分别有2， 3， 2个节点， 每个节点为一个memory block。 此外， 我们设置每个memory block中含有两个memory cell， 同一个block内的cell共享输入门， 输出门和忘记门， 这些门使得各cell可以在时间维度进行信息存储。 每个block将各cell的输出结果输入同层其他block和上一层。 其中， 每个block从输入， 输入门， 输出门， 忘记门接受输入。 
 
 
+\begin{figure}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics{Pictures/LSTM/LSTMP300Net-crop.pdf}\\
+  \caption{LSTMP300Net网络模型}\label{Fig:LSTMP300Net}
+\end{figure}
+
+
+\subsection{网络训练}
+在LSTMP300Net中， 我们选择交叉熵（crossEntropy）作为训练损失目标函数。 信息论中， 交叉熵用来度量复杂度， 如压缩问题中， 交叉熵表示平均需要几个bit来编码一个词。 用$p(x)$表示样本的真实分布, $q(x)$表示样本的估计分布， 则式\ref{Eq:ce_continuous}和\ref{Eq:ce_discrete}分别为连续数据和离散数据的信息熵表示。 
+
+\begin{equation}\label{Eq:ce_continuous}
+	H(p,q) = \int_x f(x)\log f(x)
+\end{equation}
+
+\begin{equation}\label{Eq:ce_discrete}
+	H(p,q) = -\sum_x p(x)\log q(x)
+\end{equation}
+
+在机器学习问题中， 常用交叉熵定义损失函数， 用$p_i$表示样本的真实标号， $q_i$ 为当前模型对样本的估计标号， 即：
+\begin{equation}
+	H(p,q)=-\sum_i{p_i\log q_i}
+\end{equation}
+实际上， 逻辑回归方法中的损失函数就是所有样本交叉熵的平均值， 即
+\begin{equation}
+	L(w) = -\frac{1}{N}\sum_{i=1}^N {[y_i \log g(x_i)+(1-y_i)\log (1-g(x_i))]}
+\end{equation}
+
+LSTM网络中用最小化交叉熵代替最大似然估计。 在\cite{erdogmus2002error}中有相关证明， 最小化交叉熵和最小化$d(y, g(x))$是等价的， 其中$d(y, g(x))$表示样本真实标号和网络估计的标号距离。 这说明通过最小化交叉熵可以将LSTM网络输出收敛到目标标号分布。 在LSTM网络训练时， 我们采用backpropagation through time（BPTT）算法\cite{williams1990efficient}， 将时序LSTM网络在时间维展开成一个多层前向网络， 每个时间点作为前向网络的一层。
+和前向神经网络相同， LSTM中每个隐层节点在t时刻的输出$o_j(t)=f(net_j(t))$, 不同的是， 每个时刻隐层节点输入的线性组合不仅要考虑上一层（即上一时刻）传来的输出$o_i(t-1)$， 还要考虑当前时刻的输入$x(t)$：
+\begin{equation}
+	net_j(t)=\sum_{i=1}^{l}x_i(t)w_{ij} + \sum_k{o_k(t-1)w_{kj}}
+\end{equation}
+其中$w_{ij}$表示节点i到j的权重, $l$为输入样本的维度， k为所有与j节点相连的节点的下标。 从隐层到输出层， 有
+\begin{equation}
+	y_k(t) = g(net_k(t))
+\end{equation}
+\begin{equation}
+	net_k(t) = \sum_j o_j(t)w_{jk}
+\end{equation}
+其中， $g$函数为输出层的激励函数， $f$为隐层的激励函数， 我们在LSTM网络中要学习的是参数$v$和$w$, $w$和前向网络中的连接权重类似， $v$为隐层节点$t$时刻到$t+1$时刻的连接权重。 和传统误差反传算法类似， 我们在这里求取反传误差$\delta$， 然后根据$\delta$对LSTM网络中的权重参数进行优化。
+
+
+\subsection{实验结果}
+
+本实验中， 我们仍旧用上一章中的BCI竞赛数据做P300检测。 将15300个训练数据中的95\%作为训练数据， 剩余5\%作为验证数据， 采用18000个测试数据。 利用LSTMP300Net在训练集上训练， 由于收敛较快， 所以我们只进行15次迭代。 最后分别选择验证集上分类准确率和交叉熵最小的一轮迭代作为试验结果。 如图\ref{Fig:LSTMP300Net_cross}和\ref{Fig:LSTMP300Net_class}分别为用LSTMP300Net做P300波形检测所得的交叉熵和分类错误率随迭代次数变化的曲线。 从图中可见， 在训练集和测试集上， 误差和交叉熵整体都呈降低趋势。 在第11轮迭代时， 分类误差几乎不变。 在实验结果中， 第10轮迭代在验证集上得到了最小交叉熵， 第12轮迭代时在验证集上得到了最小分类错误率。 此时， 测试集上得到的分类错误率分别为 15.59\% 和 15.57\%。
+
+ 
+\begin{figure}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[scale=0.8]{Pictures/LSTM/crossentropy.png}\\
+  \caption{LSTMP300Net交叉熵损失函数-迭代次数}\label{Fig:LSTMP300Net_cross}
+\end{figure}
+
+
+\begin{figure}[htb]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[scale=0.8]{Pictures/LSTM/classificationError.png}\\
+  \caption{LSTMP300Net分类错误率-迭代次数}\label{Fig:LSTMP300Net_class}
+\end{figure}
 
