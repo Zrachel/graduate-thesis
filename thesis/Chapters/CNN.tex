@@ -214,7 +214,7 @@ kelley1960cutting,bryson1961diffraction}从变分法中的欧拉-拉格朗日方
   \caption{$\frac{\partial L}{\partial net_j}$链式法则示意图}\label{fig:update_weight_2}
 \end{figure*}
 
-这样就可通过将误差逐层传递训练网络了。 整个算法流程如算法\ref{algo:BP_basic}所示。 在每一次迭代中， 首先前向计算出每个节点的输入$net_j$ 和输出$o_j$（见3~6行。 然后用误差反传算法， 在输出层直接用损失函数对节点求导计算反传误差（9-11行）， 其他隐层节点用公式\ref{Eq:hidden_update}计算反传误差（12-14行），最后更新权重参数（15-18行）。
+这样就可通过将误差逐层传递训练网络了。 整个误差反传算法流程如算法\ref{algo:BP_basic}所示。 在每一次迭代中， 首先前向计算出每个节点的输入$net_j$ 和输出$o_j$（见3~6行。 然后用误差反传算法， 在输出层直接用损失函数对节点求导计算反传误差（9-11行）， 其他隐层节点用公式\ref{Eq:hidden_update}计算反传误差（12-14行），最后更新权重参数（15-18行）。
 
 
 \renewcommand{\algorithmicrequire}{ \textbf{Input:}}      %Use Input in the format of Algorithm
