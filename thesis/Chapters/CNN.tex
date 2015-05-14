@@ -131,7 +131,7 @@ srivastava2012multimodal,goodfellow2013multi}, stacked auto-encoder\cite{gehring
   \caption{前向网络的网络结构}\label{fig:feed_forward}
 \end{figure*}
 
-其中， $x_i$表示第i层的输入， 整个网络的输入为$x_1$； $w_i$表示第i层的参数， $w_i^Tx_i$得到$x_i$的线性组合； $f$为非线性函数， 每一层通过非线性函数将输入数据映射到下一层， 如图中蓝色箭头所示。 经过每一层非线性映射$f_i$的刀下一层输入，即
+其中， $x_i$表示第i层的输入， 整个网络的输入为$x_1$； $w_i$表示第i层的参数， $w_i^Tx_i$得到$x_i$的线性组合； $f$为非线性函数， 每一层通过非线性函数将输入数据映射到下一层， 如图中蓝色箭头所示。 经过每一层非线性映射$f_i$得到下一层输入，即
 \begin{equation}
  x_i = f_{i-1}(w_{i-1}^Tx_{i-1})
 \end{equation}

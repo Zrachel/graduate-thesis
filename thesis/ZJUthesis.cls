@@ -831,9 +831,9 @@ breakatwhitespace=false        % sets if automatic breaks should only happen at 
 }
 
 % 公式编号前添加“公式”两字
-\usepackage{mathtools}
-\newtagform{eqtag}{公式~(}{)}
-\usetagform{eqtag}
+%\usepackage{mathtools}
+%\newtagform{eqtag}{公式~(}{)}
+%\usetagform{eqtag}
 
 % 图目录
 \usepackage{tocloft}
