@@ -1,6 +1,6 @@
 \chapter{侵入式神经信号压缩方法}
 
-在侵入式脑机接口（invasive Brain Machine Interface）中，我们将多电极阵列（multi-electrode array, MEA）植入大脑皮层从而获取高质量的电神经信号。 这种信号的采样率为30kHz, 给数据存储和传输带来了重大负荷， 所以我们需要对数据进行压缩来降低数据量。在这一节中，我们结合大脑运动皮层神经电信号的特性，提出了一种高保真压缩算法。实验中，我们将该算法应用于哺乳动物的大脑运动皮层信号，相对原信号得到了18\%的压缩率，而且没有对信号重建产生明显影响。该方法的信噪比（signal to noise ratio, SNR）达到36dB，而且spike信号也保存下来92\%，大幅超过已有工作的效果。 本章工作发表在IJCNN 2014\cite{zhang2014high}.
+在侵入式脑机接口（invasive Brain Machine Interface）中，我们将多电极阵列（multi-electrode array, MEA）植入大脑皮层从而获取高质量的电神经信号。 这种信号的采样率为30kHz, 给数据存储和传输带来了重大负荷， 所以我们需要对数据进行压缩来降低数据量。在这一节中，我们结合大脑运动皮层神经电信号的特性，提出了一种高保真压缩算法。实验中，我们将该算法应用于哺乳动物的大脑运动皮层信号，相对原信号得到了18\%的压缩率，而且没有对信号重建产生明显影响。该方法的信噪比（signal to noise ratio, SNR）达到36dB，而且spike信号也保存下来92\%，大幅超过已有工作的效果。 本章工作发表在IJCNN \cite{zhang2014high}.
 
 \section{神经电信号（electroneurographic signal）}
 
@@ -10,18 +10,18 @@
 
 现有多通道压缩算法从两种思路进行实现。一种是应用通道内特性对每个通道的信号分别进行压缩，另一种是用通道间相关性同时对所有通道的信号进行压缩。从第一个思路出发，Weber等人通过基于小波的编码器对老鼠躯体感觉皮质（S1区）进行压缩，然后这种方法代价是丢掉了25\%的spike，对于后期的信号还原和分析并不理想。Chen等人对老鼠的S1区域进行研究，通过自适应信号量化在信噪比保持25db的时候达到的压缩率高于25\%，那么信号压缩率和信号质量都得不到保证。为了改善他们的工作，Chen从第二种思路出发，利用通道间的信号相关性，在25db信噪比的情况下，将压缩率降至5\%。然而，以上几种方法都丢失了太多信号细节，白费了采集来的高分辨率信号。
 
-本章中，我们提出了一个运动皮层胞外信号的高保真压缩框架。 首先，我们讨论这种信号的3个特性：1) 信号能量集中在低频；2）离散余先变换系数中的高频部分可能对英语spike的激活模式 3）通道间相关性不稳定。根据特性（2），我们提出了一个新颖的幅值滤波器，将离散余先变换系数按幅值，而不是按频率分为两部分。低幅值成分由一个符号编码方法进行编码来降低全局失真；高幅值成分，包含主要信息和spike，由另一步骤编码。这个步骤叫混合编码，包含哈弗曼编码和一个新颖的零长编码。我们的主要工作如下：
+本章中，我们提出了一个运动皮层胞外信号的高保真压缩框架。 首先，我们基于这种信号的3个特性提出了一个新颖的幅值滤波器，
+然后提出符号编码和混合编码方法分别对滤波后数据进行压缩。 混合编码方法由哈弗曼编码和零长编码组合， 我们根据零分量占比分布提出了界限下降算法来求取两种编码方法的分界点。 
+本章主要工作如下：
 
-\begin{list}{-}
-\item 设计了一种新颖的幅值滤波器，它将离散余先变换系数根据幅值分为两部分，这避免了spike信息的丢失。
-\item 提出了一个符号编码方法，用来对低幅值成分进行编码，而不是简单丢弃。这有效避免了全局信号失真。 
-\item 发明了一种合并哈弗曼编码和新颖的零长编码的混合编码方法，用来对高幅值成分和低幅值成分的索引进行编码。由此，spike信息得到了精准的结构化保存。
-\end{list}
+\begin{enumerate}
+\item 为避免了spike信息的丢失提出幅值滤波器， 既保存了整个信号能量又细化了动作电位的压缩。
+\item 提出混合编码方法， 结合熵编码方法和键值编码方法各自优势， 并提出界限下降算法给定两种方法的压缩范围。
+\item 格式化压缩码， 将双阶编码压缩、 解压方法形成一套完整的压缩框架， 应用于侵入式神经电信号的压缩。
+\end{enumerate}
 
 
-
-
-最后，我们用一系列方法测试我们提出的压缩框架，得到了平均信噪比36db，压缩比18\%的效果，而且spike保真率保持在92\%以上，保证了重构效果。
+最后，我们用一系列方法测试我们提出的压缩框架，得到了平均信噪比36db，压缩比18\%的效果，而且spike保真率保持在92\%以上，保证了信号重构效果。
 
 
 
@@ -46,7 +46,7 @@
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics[width=3in]{Pictures/Compression/f1-crop.pdf}\\
-  \caption{频域前12个系数的能量分布。}\label{Fig:Characteristic1}
+  \caption{频域前12个系数的能量分布}\label{Fig:Characteristic1}
 \end{figure}
 
 
@@ -57,7 +57,7 @@
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics[width=3in]{Pictures/Compression/f2-crop.pdf}\\
-  \caption{神经电信号高频部分DCT系数幅值分布。}\label{Fig:Characteristic2}
+  \caption{神经电信号高频部分DCT系数幅值分布}\label{Fig:Characteristic2}
 \end{figure}
 
 
@@ -80,7 +80,7 @@
   % Requires \usepackage{graphicx}
   \includegraphics[width=3in]{Pictures/Compression/f3(ab)-crop.pdf}\\
   \includegraphics[width=3in]{Pictures/Compression/f3(c)-crop.pdf}\\
-  \caption{通道间相关系数。 }\label{fig:Characteristic3}
+  \caption{通道间相关系数}\label{fig:Characteristic3}
 \end{figure}
 
 \end{enumerate}
@@ -94,12 +94,12 @@
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics{Pictures/Compression/f4test1-crop.pdf}\\
-  \caption{Flow diagram of the overall compression algorithm}\label{Fig:Compression Algorithm Diagram}
+  \caption{压缩算法总框架流程}\label{Fig:Compression Algorithm Diagram}
 \end{figure*}
 
 对于每个通道，首先将原信号分割成长度为$S_b$的块，然后每块通过以下两个模块进行处理：\\
 \begin{enumerate}[\sffamily a.]
-\item{\textbf{\textit{Preprocessing}}}\\
+\item{\textbf{\textit{预处理}}}\\
 该模块通过离散余弦变换（Discrete Cosine Transformation，DCT）将原信号转换成频域。由于高频部分一些峰值可能对应于spike firing模式，所以传统压缩方法不适用于该信号的压缩。因此，我们提出按频谱幅值对信号进行分割，而不是根据频率高低分割。DCT系数通过一个幅值滤波器，分为高幅值成分（High-Amplitude-Component,HAC）和低幅值成分（Low-Amplitude-Component,LAC）。HAC包含显著地LFP和动作电位，其他信号归入LAC。 
  
 \item{\textbf{\textit{双阶编码}}}\\
@@ -175,7 +175,7 @@
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics{Pictures/Compression/f5-crop.pdf}\\
-  \caption{频域量化系数。}\label{fig:Quantized Coefficient Distribution}
+  \caption{频域量化系数}\label{fig:Quantized Coefficient Distribution}
 \end{figure}
 
 
@@ -240,7 +240,7 @@
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics{Pictures/Compression/f6-crop.pdf}\\
-  \caption{16个序列段的零元素分布情况。}\label{fig:Zero Distribution}
+  \caption{16个序列段的零元素分布情况}\label{fig:Zero Distribution}
 \end{figure}
 
 令$T_{HZ}$表示在哈夫曼编码与零长编码的分界$B$处,零的出现概率，那么该段中领的个数可以用$T_{HZ}\cdot \frac{S_b}{N_s}$表示，其中$\frac{S_b}{N_s}$是每段中的元素个数。这样，分界限可由式\ref{Eq:Boundary Brief Def}得出，$B$之前采用哈夫曼编码，$B$之后采用零长编码。
@@ -355,15 +355,15 @@ To compare the two encoding length, we use Eq.(\ref{Eq:length of Huffman}) minus
 \renewcommand{\algorithmicrequire}{ \textbf{Input:}}      %Use Input in the format of Algorithm
 \renewcommand{\algorithmicensure}{ \textbf{Output:}}     %UseOutput in the format of Algorithm
 \begin{algorithm}
-\caption{BOUNDARY DESCENT ALGORITHM}
+\caption{界限下降算法}
 \label{algo:bda}
 \begin{algorithmic}[1]  
-\Require Quantized HAC to be compressed $H_c^Q$
+\Require 将 HAC 量化后待压缩的 $H_c^Q$
 \Ensure  \textbf{\emph{HCT}},\emph{B}
 \State	$k_z\leftarrow3,\varepsilon\leftarrow1$
 \While{($\varepsilon=1$)}
     \For{$c\leftarrow1 to N_c$}
-        \For{$i\leftarrow1 to S_b$}
+        \For{$i\leftarrow1$ to $S_b$}
             \State $\Omega_0(i)\leftarrow \sum_{c=1}^C 1_{\left\{H_c^Q[i]=0\right\}}$
         \EndFor
     \EndFor
@@ -389,12 +389,12 @@ To compare the two encoding length, we use Eq.(\ref{Eq:length of Huffman}) minus
 然后，检验最初的假设，即是否满足式(\ref{Eq:kz}). 如果迭代所得 $l_0$与假设不吻合，就用$\frac{3}{l_0}$代替，始终迭代直到达到条件$l_0$(\textbf{\emph{HCT}})$\cdot k_z = 3$ (12-16行)。注意$l_0$应被限制在3之内，否则就无须用哈夫曼编码了（17-19行）。这个算法最终返回 \textbf{\emph{HCT}} 和分界处 \emph{B}。
 
 \begin{algorithm}
-\caption{Overall Compression Algorithm}
+\caption{压缩算法总流程}
 \label{algo:overall_algorithm}
 \begin{algorithmic}[1]  
-\Require {$\bm{X}$, the signal; $S_b$, the block size; $T_{LH}$, the threshold between HAC and LAC; \emph{B}, the boundary within Hybrid Encoding}
-\Ensure {$\bm{Y}$, formatted compression result; $\bm{Z}$, lengths of \emph{Symbol Encoding} codes for all blocks }
-\State Divide $\bm{X}$ into blocks of size $S_b$, $\bm{X}_{(1)},\bm{X}_{(2)},...,\bm{X}_{(N)}$
+\Require {信号$\bm{X}$; 块大小$S_b$; HAC和LAC之间阈值$T_{LH}$; 混合编码的界限\emph{B}}
+\Ensure {格式化的压缩结果$\bm{Y}$; 符号编码部分总长度$\bm{Z}$}
+\State 将 $\bm{X}$ 分为单位长度是 $S_b$ 大小的块, $\bm{X}_{(1)},\bm{X}_{(2)},...,\bm{X}_{(N)}$
 %Calculate Quantization Table and LAC\\
     \For{$i = 1,...,N$}
         \State $\bm{F}_{(i)} \leftarrow DCT(\bm{X}_{(i)})$
@@ -405,7 +405,7 @@ To compare the two encoding length, we use Eq.(\ref{Eq:length of Huffman}) minus
 	\State $\bm{Y}$ $\leftarrow$ [\,]
 \For{$i = 1,...,N$}
     \State $\bm{HAC}_{(i)} \leftarrow \bm{F}_{(i)}$; \,\,$\bm{HAC}_{(i)}(\bm{low}_{(i)}) \leftarrow 0$
-    \State $\bm{S}\leftarrow sgn(\bm{LAC}_{(i)})$;\,\, $\bm{Y}\leftarrow [\bm{Y}\; \bm{S}];$  \%\emph{Symbol Encoding}
+    \State $\bm{S}\leftarrow sgn(\bm{LAC}_{(i)})$;\,\, $\bm{Y}\leftarrow [\bm{Y}\; \bm{S}];$  \%\emph{符号编码}
     \State $\bm{Z}_{(i)}\leftarrow length(\bm{S})$; 
     \State $\bm{H_c}^Q\leftarrow round(\bm{Hc}_{(i)}./\bm{QT});$
     \State $\bm{H}\leftarrow Huffman(\bm{H_c}^Q(1:B))$; $\bm{Y} \leftarrow [\bm{Y}\; \bm{H}];$
@@ -526,7 +526,7 @@ To compare the two encoding length, we use Eq.(\ref{Eq:length of Huffman}) minus
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics[scale=0.9]{Pictures/Compression/f10-crop.pdf}\\
-  \caption{ 不同$T_{LH}$和QT下的 SNR, Spike Ratio 和 Compression Ratio。}\label{fig:Comparison-TLH}
+  \caption{ 不同$T_{LH}$和QT下的 SNR, Spike Ratio 和 Compression Ratio}\label{fig:Comparison-TLH}
 \end{figure*}
 
 
@@ -537,7 +537,7 @@ To compare the two encoding length, we use Eq.(\ref{Eq:length of Huffman}) minus
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics[scale=0.9]{Pictures/Compression/f11-crop.pdf}\\
-  \caption{不同量化表比例系数下的压缩效果。 }\label{fig:Comparison:TLH-2}
+  \caption{不同量化表比例系数下的压缩效果}\label{fig:Comparison:TLH-2}
 \end{figure*}
 
 $T_{LH}$的选择取决于我们的压缩要求。例如， 如果希望SNR大于30db且Spike Ratio不小于90\%的话，选择$T_{LH}=24$, 可以得到平均Compression Ratio为17.75\%， SNR达到36.24db， Spike Ratio大于90\%。 
@@ -549,7 +549,7 @@ $T_{LH}$的选择取决于我们的压缩要求。例如， 如果希望SNR大�
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics[scale = 1.1]{Pictures/Compression/f12-crop.pdf}\\
-  \caption{不同块大小$S_b$下进行数据分割的压缩预处理的压缩结果。}\label{fig:Comparison:Sb}
+  \caption{不同块大小$S_b$下进行数据分割的压缩预处理的压缩结果}\label{fig:Comparison:Sb}
 \end{figure*}
 
 
@@ -571,7 +571,7 @@ $T_{LH}$的选择取决于我们的压缩要求。例如， 如果希望SNR大�
   无 & 36.6 & 91.9\% & 17.7\% \\
   \hline
   \end{tabular}
-  \caption{SNR, Spike Ratio and Compression Ratio With and Without Symbol Encoding (Low-Amplitude)}
+  \caption{有/无符号编码情况下的SNR, Spike Ratio 和 Compression Ratio}
   \centering \label{tab:T1}
 \end{table}
 
@@ -615,7 +615,7 @@ $T_{LH}$的选择取决于我们的压缩要求。例如， 如果希望SNR大�
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics{Pictures/Compression/f13-crop.pdf}\\
-  \caption{ 我们方法与音频编码方法压缩效果比较。 }\label{fig:Comparison-AAC and Ours}
+  \caption{ 我们方法与音频编码方法压缩效果比较}\label{fig:Comparison-AAC and Ours}
 \end{figure}
 
 
