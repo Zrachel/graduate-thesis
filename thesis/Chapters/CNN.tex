@@ -6,6 +6,7 @@
 
 \begin{table}[ht]
 \centering
+  \caption{深度学习与传统模式识别方法}
   \begin{tabular}{|c||c|c|c|}
   \hline
    & 特征 & 分类器 & 特点\\
@@ -15,7 +16,6 @@
   深度学习 & 训练特征提取模型 & 复杂可训练分类器 & End-to-End learning，feature易操作\\
   \hline
   \end{tabular}
-  \caption{深度学习与传统模式识别方法}
   \centering \label{Tab:dl_overview_compare}
 \end{table}
 
@@ -34,7 +34,7 @@ y=sign(\sum_{i=1}^N{w_iF_i(x)}+b)
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics[scale=0.9]{Pictures/CNN/perceptron.jpg}\\
-  \caption{Perceptront图例}\label{fig:perceptron}
+  \caption{Perceptront图例\cite{rosenblatt1960perceptron}}\label{fig:perceptron}
 \end{figure*}
 
 目前最普及的实际应用也用到了线性分类器的一些变种，或者叫模板匹配（template matching）。 但是由于其底层的特征提取器需要反映特定信号的特点， 所以需要由特定领域专家来设置。 比如图像处理领域， 对于不同任务（ 图像分类， 图像分割， 图像跟踪等）， 所要求的特征就各不相同， 需要针对特定任务定义图像特征。 此外，传统方法也很难设计kernel, 从而不容易表达对距离的度量，仍然以图像来说，最简单的距离度量思路是对应像素相减，但是这显然不能表达图像语义层的相似信息。
@@ -64,13 +64,13 @@ y=sign(\sum_{i=1}^N{w_iF_i(x)}+b)
 y=f(W^kf(W^{k-1}f(...f(W^0X)...)))
 \label{Eq:dl_formulation}
 \end{equation}
-其中， W为权重参数，k为层数，$W^iX$为输入X的线性表示， $f$为非线性函数, 如$tanh$ 函数。 深度学习就是优化$y$与groundtruth之间的距离，使之最小化。 从图像角度， 如图\ref{fig:feature_level}所示\cite{zeiler2014visualizing,zeiler2013stochastic}，图中(a)，（b）,(c)分别为自动学得的底层特征，中层特征和高层特征， 其中底层特征学习图像的浅层特征，在所有类别中共享， 如(a)中,学到的特征类似Gabor滤波器所提取的边缘特征\cite{ngiam2010tiled,shi1998gabor}， 从中间层到高层依次学习图像更深层的语义特征， 如有语义的显著图像区域， 高层特征更为稳定，也具有类属性。  从自然语言处理的角度， 初始输入为字符， 从底层向上依次学习单词， 短语， 长句， 文章。
+其中， W为权重参数，k为层数，$W^iX$为输入X的线性表示， $f$为非线性函数, 如$tanh$ 函数。 深度学习就是优化$y$与groundtruth之间的距离，使之最小化。 从图像角度， 如图\ref{fig:feature_level}所示为卷积神经网络各层的特征， 图中(a)，（b）,(c)分别为自动学得的底层特征，中层特征和高层特征， 其中底层特征学习图像的浅层特征，在所有类别中共享， 如(a)中,学到的特征类似Gabor滤波器所提取的边缘特征\cite{ngiam2010tiled,shi1998gabor}， 从中间层到高层依次学习图像更深层的语义特征， 如有语义的显著图像区域， 高层特征更为稳定，也具有类属性。  从自然语言处理的角度， 初始输入为字符， 从底层向上依次学习单词， 短语， 长句， 文章。
 
 \begin{figure*}[htb]
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics[scale=0.9]{Pictures/CNN/low_mid_high_feature.png}\\
-  \caption{各层次feature}\label{fig:feature_level}
+  \caption{卷积神经网络各层特征\cite{zeiler2014visualizing}}\label{fig:feature_level}
 \end{figure*}
 
 
@@ -127,7 +127,7 @@ srivastava2012multimodal,goodfellow2013multi}, stacked auto-encoder\cite{gehring
 \begin{figure*}[htb]
   \centering
   % Requires \usepackage{graphicx}
-  \includegraphics[scale=0.9]{Pictures/CNN/feed-forward-crop.pdf}\\
+  \includegraphics[scale=0.7]{Pictures/CNN/feed-forward-crop.pdf}\\
   \caption{前向网络的网络结构}\label{fig:feed_forward}
 \end{figure*}
 
@@ -293,7 +293,7 @@ BP尽管在理论上支持深度网络的训练， 但是实际应用中BP一般
 \begin{figure*}[htb]
   \centering
   % Requires \usepackage{graphicx}
-  \includegraphics[scale=0.8]{Pictures/CNN/single_layer-crop.pdf}\\
+  \includegraphics[scale=0.7]{Pictures/CNN/single_layer-crop.pdf}\\
   \caption{局部连接示意图}\label{fig:local_connectivity}
 \end{figure*}
 
@@ -306,7 +306,7 @@ BP尽管在理论上支持深度网络的训练， 但是实际应用中BP一般
 \begin{figure*}[htb]
   \centering
   % Requires \usepackage{graphicx}
-  \includegraphics[scale=0.8]{Pictures/CNN/stride-crop.pdf}\\
+  \includegraphics[scale=0.6]{Pictures/CNN/stride-crop.pdf}\\
   \caption{stride示意图}\label{fig:stride}
 \end{figure*}
 
@@ -325,7 +325,7 @@ BP尽管在理论上支持深度网络的训练， 但是实际应用中BP一般
   \centering
   % Requires \usepackage{graphicx}
   \includegraphics[scale=0.7]{Pictures/CNN/lenet.jpg}\\
-  \caption{LeNet5， 一个为手写数字做分类的卷积神经网络。\cite{lecun1998gradient}}\label{fig:lenet}
+  \caption{LeNet5， 一个为手写数字做分类的卷积神经网络\cite{lecun1998gradient}}\label{fig:lenet}
 \end{figure*}
 
 
@@ -493,7 +493,7 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari,speelpenning1980c
 \begin{enumerate}
 	\item Loss 层的设计\\
 		由表\ref{tab:p300_experiment_conf}可知， 该样本存在正负样本不均衡的问题， 正样本与负样本比例为1：5。 因此我们考虑样本均衡方法， 如Hubert的工作中分别设置了5个分类器， 每个分类器用全部正样本和$\frac{1}{5}$的负样本做训练。 但是， 这样还需要考虑到后续分类器做融合时ensemble learning带来的提升效果。 为了在同一个网络中进行训练并作性能测试， 我们更改loss层定义， 改用weighted loss。 
-		在weighted loss中， 我们受boosting启发\cite{}， 赋给正样本较大权重， 赋给负样本较小权重。 这样在调整的时候就可以更注重正样本的调整。 采用euclidean loss, 其loss定义如下：
+		在weighted loss中， 我们受boosting启发\cite{freund1997decision}， 赋给正样本较大权重， 赋给负样本较小权重。 这样在调整的时候就可以更注重正样本的调整。 采用euclidean loss, 其loss定义如下：
 
 \begin{equation}
 	L(f(x),y) = \sum_{i=1}^N {g(y_i)(f(x_i) - y_i)^2}
@@ -511,7 +511,7 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari,speelpenning1980c
 \begin{equation}
 	L(net_n,y) = \frac{1}{2}[\frac{5}{6}(y+1) + \frac{1}{6}(1-y)](net_n-y)^2
 \end{equation}
-	而后其更新可以根据算法\ref{algo:BP_basic}得到, 第n层的反向传播误差为：
+	而后其更新可以根据误差反传算法得到, 第n层的反向传播误差为：
 	
 \begin{equation}
 	\delta_n = \frac{\partial L}{\partial net_n} = [\frac{5}{6}(y+1) + \frac{1}{6}(1-y)](net_n-y)
@@ -531,7 +531,7 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari,speelpenning1980c
   	\centering
   	% Requires \usepackage{graphicx}
   	\includegraphics[scale=0.8]{Pictures/CNN/activation.jpg}
-  	\caption{激励函数sigmoid,tanh,ReLu,softplus}\label{Fig:activation}
+  	\caption{激励函数 sigmoid,tanh,ReLu,softplus}\label{Fig:activation}
 	\end{figure*}
 	
 	相比其他非线性映射函数， ReLU有一些显著优势。 首先， 它具有sparse约束性， 因为从概率角度， 只有50\%的神经元被激活。 其次， ReLU具有没有tanh， sigmoid的梯度vanishing和exploding问题\cite{zeiler2013rectified}。 最后， ReLU具有计算简单的性质， 所以更为高效。
@@ -585,6 +585,7 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari,speelpenning1980c
 
 \begin{table}[ht]
 \centering
+  \caption{实验人A —— P300 检测各卷积神经网络结果}
   \begin{tabular}{|c||c|c|c|c|c|c|c|c|}
   \hline
    & TP & TN & FP & FN & Reco.(\%) & Recall & Precision & F-value \\
@@ -606,13 +607,13 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari,speelpenning1980c
 	PConv & 2216 & 11402 & 3598 & 784 & 75.656  & 0.739  & 0.381  & 0.503 \\
   \hline
   \end{tabular}
-  \caption{实验人A —— P300 检测各卷积神经网络结果}
   \centering \label{tab:p300_cnn_A}
 \end{table}
 
 
 \begin{table}[ht]
 \centering
+  \caption{实验人B —— P300 检测各卷积神经网络结果}
   \begin{tabular}{|c||c|c|c|c|c|c|c|c|}
   \hline
    & TP & TN & FP & FN & Reco.(\%) & Recall & Precision & F-value \\
@@ -634,7 +635,6 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari,speelpenning1980c
   PConv & 2537 & 12679 & 2321 & 463 & 84.533 & 0.846 & 0.522 & 0.646 \\
   \hline
   \end{tabular}
-  \caption{实验人B —— P300 检测各卷积神经网络结果}
   \centering \label{tab:p300_cnn_B}
 \end{table}
 
