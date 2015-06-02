@@ -1,5 +1,8 @@
 \chapter{基于循环神经网络的脑电P300检测方法}
 
+对于深度学习中的另一种网络——循环神经网络， 目前很少有方法对非侵入式信号进行处理， 但我们注意到循环神经网络可以很好地利用时间维度相关性对时间序列进行建模， 而其中的长短时间记忆方法可以很好地避免传统循环神经网络训练难以收敛的问题。 因此， 本文中设计了LSTMP300Net， 采用长短时间记忆方法对EEG信号建模 ， 使其能够更好地拟合信号在P300检测任务上的信号特性。 最后在实验中， 我们比较了ConvP300Net和LSTMP300Net， 结果表示LSTMP300Net比ConvP300Net效果强2.8\%。
+
+
 \section{循环神经网络}
 
 人类可以很快地识别节奏模式序列，即那些有时间间隔的子模式。此外，鼓手等演奏者也能根据运动命令生成有精确时间节奏的节奏序列。这促使人们研究人工系统，去分离或产生通过事件间时间间隔长度传递信息的模式。
@@ -85,7 +88,7 @@ LSTM的体系结构允许LSTM容忍输入的事件之间有很长的时间延时
 
 \subsection{LSTM相关工作}
 
-LSTM在语音识别、连续手写识别、音乐合成、生物医药方面都有相关应用。 LSTM RNN是著名语音识别数据库TIMIT的benchmark (Graves et al, ICASSP 2013)， Nicole等人用大量数据在LSTM网络进行RNN的retraining\cite{beringer2005classifying}，这是无法在HMM中实现的。 google用LSTM RNN来改善大规模语音识别\cite{sak2014long}。在类似问题上，\cite{sutskever2014sequence}将LSTM应用在机器翻译问题，实现了sequences to sequence学习。 连续（即字符无分割的）手写识别方面，  Connectionist Temporal Classification（CTC）\cite{graves2012connectionist}训练的RNN（CTC-LSTM）\cite{bluche2014a2ia}，在2009年跑得结果赢了很多手写识别竞赛的冠军\cite{graves2006connectionist}。 音乐合成方面， RNN的变种RNN-RBM可以无监督地形成简单的钢琴旋律\cite{boulanger2012modeling}。 通过用音乐集训练LSTM网络，网络就可以无监督地生成有特定样式的旋律与和弦的音乐样本, 而前向网络和传统RNN都无法学习出和弦音\cite{eck2002first}。 生物医药方面， 在RNN中还可以实现无分割的蛋白质分析\cite{hochreiter2007fast}， 其本质和无分割的手写体识别同理。
+在应用方面， LSTM在语音识别、连续手写识别、音乐合成、生物医药方面都有相关应用。 LSTM RNN是著名语音识别数据库TIMIT的benchmark (Graves et al, ICASSP 2013)， Nicole等人用大量数据在LSTM网络进行RNN的retraining\cite{beringer2005classifying}，这是无法在HMM中实现的。 google用LSTM RNN来改善大规模语音识别\cite{sak2014long}。在类似问题上，\cite{sutskever2014sequence}将LSTM应用在机器翻译问题，实现了sequences to sequence学习。 连续（即字符无分割的）手写识别方面，  Connectionist Temporal Classification（CTC）\cite{graves2012connectionist}训练的RNN（CTC-LSTM）\cite{bluche2014a2ia}，在2009年跑得结果赢了很多手写识别竞赛的冠军\cite{graves2006connectionist}。 音乐合成方面， RNN的变种RNN-RBM可以无监督地形成简单的钢琴旋律\cite{boulanger2012modeling}。 通过用音乐集训练LSTM网络，网络就可以无监督地生成有特定样式的旋律与和弦的音乐样本, 而前向网络和传统RNN都无法学习出和弦音\cite{eck2002first}。 生物医药方面， 在RNN中还可以实现无分割的蛋白质分析\cite{hochreiter2007fast}， 其本质和无分割的手写体识别同理。
 
 
 
@@ -95,7 +98,7 @@ LSTM在语音识别、连续手写识别、音乐合成、生物医药方面都�
 LSTM通过设置恒定的传递误差来解决上面提到的长时间延时问题。 在基本LSTM单元中， LSTM引入了一个自连接线性单元， 称作误差旋转木马（error carousel）, 恒定的传递误差中设定权重$w$恒等于1， $f$为线性函数， 目的是这各部分只起到传递误差的作用，而将学习参数作用于其他权重。
 
 LSTM以memory block作为基本单元，其中包含一个至多个memory cell，典型的LSTMmemory cell如图\ref{Fig:lstm_simple}所示：
-核心有一个线性单元（或者称作线性神经元，如图橘黄色所示）， 这是个线性单元， 在任意给定时间， 该单元将其所有输入通过加权连接求和。 它的自循环连接权重固定为1（即与左边紫色圆点之间的半圆连接权重固定为1）， 这样通过确保训练信号或者误差在被传递的时候不会消失（vanish）克服了原先RNN的一个主要问题：vanish（参考3.2节）。 而且这个核心神经元为线性让LSTM实现了可以识别多达1000步之前的模式。
+核心有一个线性单元（或者称作线性神经元，如图橘黄色所示）， 这是个线性单元， 在任意给定时间， 该单元将其所有输入通过加权连接求和。 它的自循环连接权重固定为1（即与左边紫色圆点之间的半圆连接权重固定为1）， 这样通过确保训练信号或者误差在被传递的时候不会消失（vanish）克服了原先RNN的一个主要问题：vanish（参考3.2节）。 而且这个核心神经元为线性让LSTM实现了可以识别多达1000步之前的模式。 
 
 
 \begin{figure}[htb]
@@ -105,7 +108,7 @@ LSTM以memory block作为基本单元，其中包含一个至多个memory cell�
   \caption{LSTM模型Memory block结构}\label{Fig:lstm_simple}
 \end{figure}
 
-在这个核心周围是非线性可适应神经元， 用来学习非线性神经动作。 图中蓝色神经元用来表示输入， 三个绿色神经元分别表示三个门（左边的是忘记门，右下角为输入门，右上角为输出门），这些门通过学习来使核心线性神经元不受无关事件和误差信号的干扰， 而又能通过有效信息更新网络参数，即门是否打开来决定信号的有效性。 最后， 紫色圆点用以表示乘积操作。 LSTM的学习算法是非常高效的,每个边权的计算复杂度不超过O(1)。
+在CEC核心周围是非线性可适应神经元， 用来学习非线性神经动作。 图中蓝色神经元用来表示输入， 三个绿色神经元分别表示三个门（左边的是忘记门，右下角为输入门，右上角为输出门），这些门通过学习来使核心线性神经元不受无关事件和误差信号的干扰， 而又能通过有效信息更新网络参数，即门是否打开来决定信号的有效性。 最后， 紫色圆点用以表示乘积操作。 LSTM的学习算法是非常高效的,每个边权的计算复杂度不超过O(1)。
 
 
 LSTM的应用中， 可以将多个memory cell进行组合， 如图\ref{Fig:lstm_mixture}所示混合模型。 其中有两个memory cell， 分别从输入和输入门接受输入， 每个cell将输出结果分别传给另一个memory cell的输入， 输入门， 输出门和忘记门。 但实际应用中，通常将一至多个memory cell组合成memory block， 共享输入， 输出， 忘记门的权重（而不共享输入的权重），这样可以减少自适应参数的数量， 同时使block内部各cell起到不同作用。 
@@ -116,6 +119,10 @@ LSTM的应用中， 可以将多个memory cell进行组合， 如图\ref{Fig:lst
   \includegraphics[scale = 0.5]{Pictures/LSTM/lstm_mixture_model.pdf}\\
   \caption{LSTM混合模型}\label{Fig:lstm_mixture}
 \end{figure}
+
+LSTM的发展过程经历了约10年： 1995至1997年，  Hochreiter 和 Schmidhuber 提出LSTM，包括cell，input gate, output gate的概念， 训练方法为Real time recurrent learning(RTRL)和BPTT， 只有cell的误差（梯度）被反传回来，其他循环连接都被截断了。 1999年，  Gers等人在LSTM中加入了forget gate. 这使得LSTM可以学习连续任务（如Reber grammar）。2000年， Gers 和 Schmidhuber 提出加入窥孔连接（peephole connections）。 这样可以使LSTM可以学习需要精确时间定位的任务。 所谓peephole connections，就是从LSTM中间的那个CEC但愿到各个门的连接。 2005年， Graves 和 Schmidhuber 提出完全用BPTT进行LSTM网络训练， 并给出了TIMIT数据集上的benchmark。
+
+
 
 
 
@@ -172,7 +179,12 @@ LSTM网络中用最小化交叉熵代替最大似然估计。 在\cite{erdogmus2
 
 \subsection{实验结果}
 
-本实验中， 我们仍旧用上一章中的BCI竞赛数据做P300检测。 将15300个训练数据中的95\%作为训练数据， 剩余5\%作为验证数据， 采用18000个测试数据。 利用LSTMP300Net在训练集上训练， 由于收敛较快， 所以我们只进行15次迭代。 最后分别选择验证集上分类准确率和交叉熵最小的一轮迭代作为试验结果。 如图\ref{Fig:LSTMP300Net_cross}和\ref{Fig:LSTMP300Net_class}分别为用LSTMP300Net做P300波形检测所得的交叉熵和分类错误率随迭代次数变化的曲线。 从图中可见， 在训练集和测试集上， 误差和交叉熵整体都呈降低趋势。 在第11轮迭代时， 分类误差几乎不变。 在实验结果中， 第10轮迭代在验证集上得到了最小交叉熵， 第12轮迭代时在验证集上得到了最小分类错误率。 此时， 测试集上得到的分类错误率分别为 15.59\% 和 15.57\%。
+本实验中， 我们仍旧用上一章中的BCI竞赛数据做P300检测。 将15300个训练数据中的95\%作为训练数据， 剩余5\%作为验证数据， 采用18000个测试数据。 通过模型调整， LSTMP300Net在主体A和B上平均比ConvP300Net效果强2.80\%。
+
+
+\subsubsection{交叉熵与分类错误率}
+
+首先， 我们用当前LSTMP300Net在训练集上训练， 由于收敛较快， 所以我们只进行15次迭代。 最后分别选择验证集上分类准确率和交叉熵最小的一轮迭代作为试验结果。 如图\ref{Fig:LSTMP300Net_cross}和\ref{Fig:LSTMP300Net_class}分别为用LSTMP300Net做主体B的P300波形检测所得的交叉熵和分类错误率随迭代次数变化的曲线。 从图中可见， 在训练集和测试集上， 误差和交叉熵整体都呈降低趋势。 在第11轮迭代时， 分类误差几乎不变。 在实验结果中， 第10轮迭代在验证集上得到了最小交叉熵， 第12轮迭代时在验证集上得到了最小分类错误率。 此时， 测试集上得到的分类错误率分别为 15.59\% 和 15.57\%， 与ConvP300Net的P300波形检测结果相当。
 
  
 \begin{figure}[htb]
@@ -190,3 +202,51 @@ LSTM网络中用最小化交叉熵代替最大似然估计。 在\cite{erdogmus2
   \caption{LSTMP300Net分类错误率-迭代次数}\label{Fig:LSTMP300Net_class}
 \end{figure}
 
+\subsubsection{模型变换}
+
+基于当前模型， 我们在本节中做一些改进， 通过调整模型参数后进行训练， 查看P300波形检测效果是否有所改进。 这里我们用了3个LSTMP300Net的变种， LSTM1Cell, LSTM2Layer与LSTM1C2L。 这里，  LSTM1Cell与LSTMP300Net的层数相同，但每个记忆块（memory block）中只有1个cell， 这是为了化简模型， 并取消多cell共享门带来的不确定性； LSTM2Layer比LSTMP300Net少了LSTM3那一层， 因为层数过多模型不容易调整； LSTM1C2L结合了LSTM1Cell和LSTM2Layer， 只采用了LSTMP300Net中的前两层， 且每层中每个记忆块只用了1个cell。 这三个模型及ConvP300Net, LSTMP300Net在主体A, B中的P300检测结果如表\ref{Tab:LSTM_multi}所示。
+
+\begin{table}[ht]
+\centering
+  \caption{实验人A —— P300 检测各卷积神经网络结果}
+  \begin{tabular}{|c||c|c|c|c|c|c|c|c|}
+  \hline
+   & TP & TN & FP & FN & Reco.(\%) & Recall & Precision & F-value \\
+  \hline\hline
+	ConvP300 & 2216 & 11402 & 3598 & 784 & 75.656  & 0.739  & 0.381  & 0.503 \\
+	\hline
+	LSTMP300 & 2049&	11721&	3279&	951&	0.765& 	0.683& 	0.385& 	0.492  \\
+	\hline
+	LSTMCell1 & 2242 & 11419 & 3581 &	758&	0.759 & 0.747 &	0.385& 0.508\\
+	\hline
+	LSTM2Layer & 2231	&11486&	3514&	769&	0.762& 	0.744& 	0.388& 	0.510 \\
+	\hline
+	LSTM1C2L & 2254&	11907&	3093&	746&	0.787& 	0.751& 	0.422& 	0.540  \\
+	\hline
+  \end{tabular}
+  \centering \label{tab:p300_cnn_A}
+\end{table}
+
+
+\begin{table}[ht]
+\centering
+  \caption{实验人B —— P300 检测各卷积神经网络结果}
+  \begin{tabular}{|c||c|c|c|c|c|c|c|c|}
+  \hline
+   & TP & TN & FP & FN & Reco.(\%) & Recall & Precision & F-value \\
+  \hline\hline
+  	ConvP300 & 2537 & 12679 & 2321 & 463 & 84.533 & 0.846 & 0.522 & 0.646 \\
+	LSTMP300 & 2512	&12847	&2153	&488	&0.853 &	0.837 &	0.538 &	0.655   \\
+	\hline
+	LSTMCell1 & 2546&	12680	&2320	&454	&0.846 &	0.849 &	0.523 &	0.647 \\
+	\hline
+	LSTM2Layer & 2552&	12692&	2308&448	&0.847 &	0.851 	&0.525& 	0.649  \\
+	\hline
+	LSTM1C2L & 2571	&12890&	2110&	429	&0.859 &	0.857 &	0.549 &	0.669 \\
+  \hline
+  \end{tabular}
+  \centering \label{tab:p300_cnn_B}
+\end{table}
+
+
+从表中可见，LSTMP300Conv的简化模型——LSTM1C2L效果最佳， 在主体A，B上分别达到78.7\%和85.9\%的识别率， 平均超过ConvP300Net 2.80\%。
