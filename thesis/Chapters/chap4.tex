@@ -204,7 +204,7 @@ LSTM网络中用最小化交叉熵代替最大似然估计。 在\cite{erdogmus2
 
 \subsubsection{模型变换}
 
-基于当前模型， 我们在本节中做一些改进， 通过调整模型参数后进行训练， 查看P300波形检测效果是否有所改进。 这里我们用了3个LSTMP300Net的变种， LSTM1Cell, LSTM2Layer与LSTM1C2L。 这里，  LSTM1Cell与LSTMP300Net的层数相同，但每个记忆块（memory block）中只有1个cell， 这是为了化简模型， 并取消多cell共享门带来的不确定性； LSTM2Layer比LSTMP300Net少了LSTM3那一层， 因为层数过多模型不容易调整； LSTM1C2L结合了LSTM1Cell和LSTM2Layer， 只采用了LSTMP300Net中的前两层， 且每层中每个记忆块只用了1个cell。 这三个模型及ConvP300Net, LSTMP300Net在主体A, B中的P300检测结果如表\ref{Tab:LSTM_multi}所示。
+基于当前模型， 我们在本节中做一些改进， 通过调整模型参数后进行训练， 查看P300波形检测效果是否有所改进。 这里我们用了3个LSTMP300Net的变种， LSTM1Cell, LSTM2Layer与LSTM1C2L。 这里，  LSTM1Cell与LSTMP300Net的层数相同，但每个记忆块（memory block）中只有1个cell， 这是为了化简模型， 并取消多cell共享门带来的不确定性； LSTM2Layer比LSTMP300Net少了LSTM3那一层， 因为层数过多模型不容易调整； LSTM1C2L结合了LSTM1Cell和LSTM2Layer， 只采用了LSTMP300Net中的前两层， 且每层中每个记忆块只用了1个cell。 这三个模型及ConvP300Net, LSTMP300Net在主体A, B中的P300检测结果如表\ref{tab:LSTM_multi_A}和\ref{tab:LSTM_multi_B}所示。
 
 \begin{table}[ht]
 \centering
@@ -224,7 +224,7 @@ LSTM网络中用最小化交叉熵代替最大似然估计。 在\cite{erdogmus2
 	LSTM1C2L & 2254&	11907&	3093&	746&	78.7& 	0.751& 	0.422& 	0.540  \\
 	\hline
   \end{tabular}
-  \centering \label{tab:p300_cnn_A}
+  \centering \label{tab:LSTM_multi_A}
 \end{table}
 
 
@@ -246,7 +246,7 @@ LSTM网络中用最小化交叉熵代替最大似然估计。 在\cite{erdogmus2
 	LSTM1C2L & 2571	&12890&	2110&	429	&85.9 &	0.857 &	0.549 &	0.669 \\
   \hline
   \end{tabular}
-  \centering \label{tab:p300_cnn_B}
+  \centering \label{tab:LSTM_multi_B}
 \end{table}
 
 
