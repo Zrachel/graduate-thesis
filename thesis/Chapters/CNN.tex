@@ -488,6 +488,12 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari,speelpenning1980c
 
 
 \section{实验结果及实现}\label{sec:cnn_experiment}
+
+
+\subsection{实现方法}
+我们的实现基于Berkeley Vision and Learning Center 的Yangqing Jia开发实现的Caffe\cite{jia2014caffe}， 为开源代码。 它可以实现在CPU和GPU上运行， 这里我们选用的GPU为NVIDIA出的GT Force 580， 基于cuda进行并行加速。 Caffe用纯C++实现，提供了Python，Matlab脚本和命令行接口。 通过配置文件可以定义网络结构和参数配置。 实验中， 我们将数据经过以下处理， 先将所有数据分为多个batches。 如15300个训练数据分为100个batch，其中95\%作为训练数据， 5\%作为测试数据， 每个batch有153个数据。 然后经过leveldb将数据转换成kv存储， 然后在网络中进行训练。 数据在整个网络中都通过块（blob）的形式定义。 在caffe的基础上， 本文在数据层进行数据生成与转换， 在layer中增加了weighted euclidean loss层， 并调整网络结构。
+
+
 \subsection{PConv的学习}\label{sec:weighted_loss}
 整个网络的学习采用误差反传算法， 从后往前对每一层分别求导将误差传回， 如第\ref{sec:train_net}节所示。 但有两点不同， 一是在PConv中， 我们采用不同的loss函数， 二是选用Relu非线性映射， 但是该函数在零点不可导， 下面我们来分别说明。 
 \begin{enumerate}
@@ -670,7 +676,4 @@ CNN模型通常用随机梯度下降\cite{nemirovski1978cezari,speelpenning1980c
 
 
 
-
-\subsection{实现方法}
-我们的实现基于Berkeley Vision and Learning Center 的Yangqing Jia开发实现的Caffe\cite{jia2014caffe}， 为开源代码。 它可以实现在CPU和GPU上运行， 这里我们选用的GPU为NVIDIA出的GT Force 580， 基于cuda进行并行加速。 Caffe用纯C++实现，提供了Python，Matlab脚本和命令行接口。 通过配置文件可以定义网络结构和参数配置。 实验中， 我们将数据经过以下处理， 先将所有数据分为多个batches。 如15300个训练数据分为100个batch，其中95\%作为训练数据， 5\%作为测试数据， 每个batch有153个数据。 然后经过leveldb将数据转换成kv存储， 然后在网络中进行训练。 数据在整个网络中都通过块（blob）的形式定义。 在caffe的基础上， 本文在数据层进行数据生成与转换， 在layer中增加了weighted euclidean loss层， 并调整网络结构。
 
